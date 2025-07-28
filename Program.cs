@@ -26,7 +26,6 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-
     Log.Information("Starting bot host");
 
     await Host.CreateDefaultBuilder(args)
