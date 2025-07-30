@@ -64,9 +64,9 @@ try
 
             // Core handlers
             services.AddTransient<IUpdateHandlerService, UpdateDispatcher>();
+            services.AddTransient<ICommandHandler, CountMessageHandler>();
             services.AddTransient<ICommandHandler, OptionalHandler>();
             services.AddTransient<ICommandHandler, MessageRateHandler>();
-            services.AddTransient<ICommandHandler, CountMessageHandler>();
 
         })
         .ConfigureLogging(log =>
