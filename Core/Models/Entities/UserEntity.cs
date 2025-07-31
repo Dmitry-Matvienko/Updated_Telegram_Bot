@@ -12,7 +12,7 @@ namespace MyUpdatedBot.Core.Models.Entities
         public string? Username { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public ICollection<MessageCountEntity> MessageStats { get; set; }
-            = new List<MessageCountEntity>();
+        public ICollection<MessageCountEntity> MessageStats { get; set; } = new List<MessageCountEntity>();
+        public ICollection<RatingEntity> RatingStats { get; set; } = new List<RatingEntity>();
     }
 }
