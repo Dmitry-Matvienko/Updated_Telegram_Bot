@@ -67,6 +67,7 @@ try
             services.AddTransient<ICommandHandler, CountMessageHandler>();
             services.AddTransient<ICommandHandler, OptionalHandler>();
             services.AddTransient<ICommandHandler, MessageRateHandler>();
+            services.AddTransient<ICommandHandler, RatingHandler>();
 
         })
         .ConfigureLogging(log =>

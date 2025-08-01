@@ -7,6 +7,7 @@ namespace MyUpdatedBot.Infrastructure.Data
     {
         public DbSet<UserEntity> Users { get; set; } = default!;
         public DbSet<MessageCountEntity> MessageStats { get; set; } = default!;
+        public DbSet<RatingEntity> RatingStats { get; set; } = default!;
 
         public MyDbContext(DbContextOptions<MyDbContext> opts) : base(opts) { }
 
