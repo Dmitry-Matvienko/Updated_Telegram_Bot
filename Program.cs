@@ -1,16 +1,18 @@
-﻿using MyUpdatedBot.Core.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyUpdatedBot.Core.Handlers;
-using MyUpdatedBot.Infrastructure.Data;
-using Telegram.Bot;
+using MyUpdatedBot.Core.Models;
 using MyUpdatedBot.Infrastructure;
+using MyUpdatedBot.Infrastructure.Data;
+using MyUpdatedBot.Services.Rating;
 using MyUpdatedBot.Services.Stats;
+using MyUpdatedBot.Services.UserLeaderboard;
 using Serilog;
-using Microsoft.Extensions.DependencyInjection;
+using Telegram.Bot;
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -60,7 +62,10 @@ try
 
             // Hosted Service for polling
             services.AddHostedService<BotHostedService>();
-            
+
+            // Other services
+            services.AddScoped<IRatingService, RatingService>();
+            services.AddScoped<IUserLeaderboardService, UserLeaderboardService>();
 
             // Core handlers
             services.AddTransient<IUpdateHandlerService, UpdateDispatcher>();

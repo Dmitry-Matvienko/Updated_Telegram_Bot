@@ -1,5 +1,7 @@
-﻿using MyUpdatedBot.Infrastructure.Data;
+﻿using Microsoft.Extensions.Logging;
+using MyUpdatedBot.Infrastructure.Data;
 using MyUpdatedBot.Services.Rating;
+using MyUpdatedBot.Services.UserLeaderboard;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +16,14 @@ namespace MyUpdatedBot.Core.Handlers
     public class RatingHandler : ICommandHandler
     {
         private readonly IRatingService _ratingService;
+        private readonly ILogger<RatingHandler> _logger;
+        private readonly IUserLeaderboardService _statsQuery;
 
-        public RatingHandler(IRatingService ratingService)
+        public RatingHandler(IRatingService ratingService, ILogger<RatingHandler> logger, IUserLeaderboardService statsQuery)
         {
             _ratingService = ratingService;
+            _logger = logger;
+            _statsQuery = statsQuery;
         }
 
         public bool CanHandle(string text)
@@ -32,11 +38,27 @@ namespace MyUpdatedBot.Core.Handlers
         {
             var text = message.Text?.Trim() ?? "";
 
-            //if (text.Equals("/globalrating", StringComparison.OrdinalIgnoreCase) || text.Equals("/localrating", StringComparison.OrdinalIgnoreCase))
-            //{
-            //    var top10 = await _ratingService.TopLocalRate(message.Chat.Id, message.From.Id, message.Text, ct);
-            //    await client.SendMessage(message.Chat.Id, $"{top10}", parseMode: ParseMode.Markdown, cancellationToken: ct);
-            //}
+            if (text == "/globalrating" || text == "/localrating")
+            {
+                bool isLocal = text == "/localrating";
+
+                _logger.LogInformation(
+                    "User {Id} invoked {Cmd} in chat {Chat}",
+                    message.From!.Id, message.Text, message.Chat.Id);
+
+                var resultText = await _statsQuery.TopTen(
+                    chatIdFilter: isLocal ? message.Chat.Id : (long?) null,
+                    isRating: true, // isRating = true - count the number of rating, not messages.
+                    UserId: message.From.Id,
+                    ct);
+
+                await client.SendMessage(
+                    chatId: message.Chat.Id,
+                    text: resultText,
+                    parseMode: ParseMode.Markdown,
+                    disableNotification: true,
+                    cancellationToken: ct);
+            }
 
             if (message.ReplyToMessage is null) return;
             var txt = message.Text?.ToLowerInvariant() ?? "";
@@ -51,7 +73,7 @@ namespace MyUpdatedBot.Core.Handlers
                 ct);
 
             if (given)
-                await client.SendMessage(message.Chat.Id, $"[{message.ReplyToMessage.From.FirstName}](tg://user?id={message.From.Id}) ты получил(а) рейтинг", parseMode: ParseMode.Markdown, cancellationToken: ct);
+                await client.SendMessage(message.Chat.Id, $"[{message.ReplyToMessage.From.FirstName}](tg://user?id={message.From.Id}) ты получил(а) +1 рейтинг", parseMode: ParseMode.Markdown, cancellationToken: ct);
         }
     }
 }
