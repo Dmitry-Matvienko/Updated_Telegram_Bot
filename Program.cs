@@ -5,10 +5,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyUpdatedBot.Core.Handlers;
+using MyUpdatedBot.Core.Handlers.CrocodileHandlers;
 using MyUpdatedBot.Core.Models;
 using MyUpdatedBot.Infrastructure;
 using MyUpdatedBot.Infrastructure.Data;
 using MyUpdatedBot.Services.AdminPanel;
+using MyUpdatedBot.Services.CrocodileGame;
 using MyUpdatedBot.Services.Rating;
 using MyUpdatedBot.Services.Stats;
 using MyUpdatedBot.Services.UserLeaderboard;
@@ -55,6 +57,9 @@ try
             services.AddSingleton<MessageStatsService>();
             services.AddSingleton<IMessageStatsService>(sp =>
         sp.GetRequiredService<MessageStatsService>());
+
+            services.AddSingleton<ICrocodileService, CrocodileService>();
+            services.AddSingleton<WordRepository>();
             // Hosted Service for counter of messages
             services.AddHostedService(sp =>
         sp.GetRequiredService<MessageStatsService>());
@@ -76,8 +81,11 @@ try
             services.AddTransient<ICommandHandler, CountMessageHandler>();
             services.AddTransient<ICommandHandler, AdminCommandHandler>();
             services.AddTransient<ICommandHandler, OptionalHandler>();
+            services.AddTransient<ICommandHandler, CrocodileHandler>();
+            services.AddTransient<ICommandHandler, CrocodileGuessHandler>();
             services.AddTransient<ICommandHandler, MessageRateHandler>();
             services.AddTransient<ICommandHandler, RatingHandler>();
+            services.AddTransient<IButtonHandlers, CrocodileButtonHandler>();
 
         })
         .ConfigureLogging(log =>

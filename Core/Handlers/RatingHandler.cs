@@ -38,9 +38,9 @@ namespace MyUpdatedBot.Core.Handlers
         {
             var text = message.Text?.Trim() ?? "";
 
-            if (text == "/globalrating" || text == "/localrating")
+            if (text.StartsWith("/localrating", StringComparison.OrdinalIgnoreCase) || text.StartsWith("/globalrating", StringComparison.OrdinalIgnoreCase))
             {
-                bool isLocal = text == "/localrating";
+                bool isLocal = text.StartsWith("/localrating", StringComparison.OrdinalIgnoreCase);
 
                 _logger.LogInformation(
                     "User {Id} invoked {Cmd} in chat {Chat}",
