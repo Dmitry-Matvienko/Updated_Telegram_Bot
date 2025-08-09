@@ -1,29 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyUpdatedBot.Core.Models.Entities;
 using MyUpdatedBot.Infrastructure.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 
-namespace MyUpdatedBot.Services.Rating
+namespace MyUpdatedBot.Services.UserReputation
 {
-    public class RatingService : IRatingService
+    public class ReputationService : IReputationService
     {
         private readonly MyDbContext _db;
-        private readonly ITelegramBotClient _botClient;
 
-        public RatingService(MyDbContext db, ITelegramBotClient botClient)
+        public ReputationService(MyDbContext db)
         {
             _db = db;
-            _botClient = botClient;
         }
 
-        public async Task<bool> GiveRatingAsync(long fromUserId, long toUserId, long chatId, CancellationToken ct)
+        public async Task<bool> GiveReputationAsync(long fromUserId, long toUserId, long chatId, CancellationToken ct)
         {
             if (fromUserId == toUserId)
                 return false; // Can't give yourself
@@ -43,7 +33,7 @@ namespace MyUpdatedBot.Services.Rating
 
             if (rating is null)
             {
-                rating = new RatingEntity
+                rating = new ReputationEntity
                 {
                     UserRefId = user.Id,
                     ChatId = chatId,
