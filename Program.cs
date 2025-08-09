@@ -9,10 +9,10 @@ using MyUpdatedBot.Core.Handlers.CrocodileHandlers;
 using MyUpdatedBot.Core.Models;
 using MyUpdatedBot.Infrastructure;
 using MyUpdatedBot.Infrastructure.Data;
-using MyUpdatedBot.Services.AdminPanel;
+using MyUpdatedBot.Services.OwnerTools;
 using MyUpdatedBot.Services.CrocodileGame;
-using MyUpdatedBot.Services.Rating;
-using MyUpdatedBot.Services.Stats;
+using MyUpdatedBot.Services.UserReputation;
+using MyUpdatedBot.Services.MessageStats;
 using MyUpdatedBot.Services.UserLeaderboard;
 using Serilog;
 using Telegram.Bot;
@@ -46,45 +46,50 @@ try
         .ConfigureServices((ctx, services) =>
         {
             services.Configure<BotSettings>(ctx.Configuration.GetSection("TelegramBot"))
-                    .Configure<AdminSettings>(ctx.Configuration.GetSection("Admin"));
+                    .Configure<OwnerSettings>(ctx.Configuration.GetSection("Admin"));
 
+            // Telegram-client
             services.AddSingleton<ITelegramBotClient>(sp =>
             {
                 var opts = sp.GetRequiredService<IOptions<BotSettings>>().Value;
                 return new TelegramBotClient(opts.Token);
             });
 
-            services.AddSingleton<MessageStatsService>();
-            services.AddSingleton<IMessageStatsService>(sp =>
-        sp.GetRequiredService<MessageStatsService>());
-
+            // Dictionary of words and service of the game “Crocodile”
             services.AddSingleton<ICrocodileService, CrocodileService>();
             services.AddSingleton<WordRepository>();
-            // Hosted Service for counter of messages
-            services.AddHostedService(sp =>
-        sp.GetRequiredService<MessageStatsService>());
 
+            // Message statistics service and hosted service for counter of messages
+            services.AddSingleton<MessageCountService>();
+            services.AddSingleton<IMessageCountStatsService>(sp => sp.GetRequiredService<MessageCountService>());
+            services.AddHostedService(sp => sp.GetRequiredService<MessageCountService>());
+
+            // EF Core
             services.AddDbContext<MyDbContext>(options =>
                 options.UseSqlServer(ctx.Configuration.GetConnectionString("DefaultConnection")));
 
             // Hosted Service for polling
             services.AddHostedService<BotHostedService>();
 
-            // Other services
-            services.AddScoped<IRatingService, RatingService>();
+            // Other scoped-services
+            services.AddScoped<IReputationService, ReputationService>();
             services.AddScoped<IUserLeaderboardService, UserLeaderboardService>();
             services.AddScoped<IBroadcastService, BroadcastService>();
-            services.AddScoped<IAdminStatsService, AdminStatsService>();
+            services.AddScoped<IUserStatsService, UserStatsService>();
 
             // Core handlers
             services.AddTransient<IUpdateHandlerService, UpdateDispatcher>();
-            services.AddTransient<ICommandHandler, CountMessageHandler>();
-            services.AddTransient<ICommandHandler, AdminCommandHandler>();
+
+            // Command handlers
+            services.AddTransient<ICommandHandler, CountTextMessageHandler>();
+            services.AddTransient<ICommandHandler, TopMessageCountHandler>();
+            services.AddTransient<ICommandHandler, ReputationHandler>();
             services.AddTransient<ICommandHandler, OptionalHandler>();
             services.AddTransient<ICommandHandler, CrocodileHandler>();
             services.AddTransient<ICommandHandler, CrocodileGuessHandler>();
-            services.AddTransient<ICommandHandler, MessageRateHandler>();
-            services.AddTransient<ICommandHandler, RatingHandler>();
+            services.AddTransient<ICommandHandler, OwnerCommandHandler>();
+
+            // Button handlers
             services.AddTransient<IButtonHandlers, CrocodileButtonHandler>();
 
         })

@@ -13,6 +13,6 @@ namespace MyUpdatedBot.Core.Models.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<MessageCountEntity> MessageStats { get; set; } = new List<MessageCountEntity>();
-        public ICollection<RatingEntity> RatingStats { get; set; } = new List<RatingEntity>();
+        public ICollection<ReputationEntity> RatingStats { get; set; } = new List<ReputationEntity>();
     }
 }

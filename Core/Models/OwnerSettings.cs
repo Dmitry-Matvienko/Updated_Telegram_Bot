@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyUpdatedBot.Core.Models
 {
-    public class AdminSettings
+    public class OwnerSettings
     {
         public long[] Ids { get; set; } = Array.Empty<long>();
     }

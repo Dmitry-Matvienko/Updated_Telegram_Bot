@@ -16,13 +16,8 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
     public class CrocodileButtonHandler : IButtonHandlers
     {
         private readonly ICrocodileService _games;
-        private readonly ILogger<CrocodileButtonHandler> _logger;
 
-        public CrocodileButtonHandler(ICrocodileService games, ILogger<CrocodileButtonHandler> logger)
-        {
-            _games = games;
-            _logger = logger;
-        }
+        public CrocodileButtonHandler(ICrocodileService games) => _games = games;
         public bool CanHandle(CallbackQuery callback)
         {
             // process buttons if there is an active game in this chat
@@ -30,7 +25,7 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
                 && _games.HasGame(chatId);
         }
 
-        public async Task HandleAsync(ITelegramBotClient client, CallbackQuery callback, CancellationToken ct)
+        public async Task HandleAsync(ITelegramBotClient botClient, CallbackQuery callback, CancellationToken ct)
         {
             var chatId = callback.Message!.Chat.Id;
             // return if there isnt the game
@@ -46,7 +41,7 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
                 
                 case "show_word" when isHost:
                     response = $"🔎 Слово: {state.CurrentWord}";
-                    await client.AnswerCallbackQuery(
+                    await botClient.AnswerCallbackQuery(
                         callback.Id,
                         response,
                         showAlert: true,
@@ -55,7 +50,7 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
 
                 case "show_word":
                     response = "⚠️ Только ведущий может видеть слово!";
-                    await client.AnswerCallbackQuery(
+                    await botClient.AnswerCallbackQuery(
                         callback.Id,
                         response,
                         showAlert: true,
@@ -67,7 +62,7 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
                         response = $"🔄 Новое слово: {newWord}";
                     else
                         response = "❌ Не удалось сменить слово.";
-                    await client.AnswerCallbackQuery(
+                    await botClient.AnswerCallbackQuery(
                         callback.Id,
                         response,
                         showAlert: true,
@@ -76,7 +71,7 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
 
                 case "change_word":
                     response = "⚠️ Только ведущий может сменить слово!";
-                    await client.AnswerCallbackQuery(
+                    await botClient.AnswerCallbackQuery(
                         callback.Id,
                         response,
                         showAlert: true,
@@ -85,7 +80,7 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
 
                 case "end_game" when isHost:
                     _games.EndGame(chatId);
-                    await client.SendMessage(
+                    await botClient.SendMessage(
                         chatId: chatId,
                         text: $"🛑 [{callback.From.FirstName}](tg://user?id={callback.From.Id}) завершил(а) игру. Чтобы начать новую, напиши /crocodile.",
                         parseMode: ParseMode.Markdown,
@@ -94,7 +89,7 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
 
                 case "end_game":
                     response = "⚠️ Только ведущий может завершить игру!";
-                    await client.AnswerCallbackQuery(
+                    await botClient.AnswerCallbackQuery(
                         callback.Id,
                         response,
                         showAlert: true,
@@ -102,7 +97,7 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
                     return;
 
                 default:
-                    await client.AnswerCallbackQuery(callback.Id, cancellationToken: ct);
+                    await botClient.AnswerCallbackQuery(callback.Id, cancellationToken: ct);
                     return;
             }
         }

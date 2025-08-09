@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyUpdatedBot.Core.Models;
-using MyUpdatedBot.Services.AdminPanel;
+using MyUpdatedBot.Services.OwnerTools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,13 +13,13 @@ using Telegram.Bot.Types;
 
 namespace MyUpdatedBot.Core.Handlers
 {
-    public class AdminCommandHandler : ICommandHandler
+    public class OwnerCommandHandler : ICommandHandler
     {
         private readonly IBroadcastService _bcast;
-        private readonly IAdminStatsService _stats;
+        private readonly IUserStatsService _stats;
         private readonly IReadOnlyCollection<long> _admins;
 
-        public AdminCommandHandler(IBroadcastService bcast,IAdminStatsService stats, IOptions<AdminSettings> admins)
+        public OwnerCommandHandler(IBroadcastService bcast,IUserStatsService stats, IOptions<OwnerSettings> admins)
         {
             _bcast = bcast;
             _stats = stats;
@@ -28,15 +28,15 @@ namespace MyUpdatedBot.Core.Handlers
 
         public bool CanHandle(string text) => text.StartsWith("/admin", StringComparison.OrdinalIgnoreCase);
 
-        public async Task HandleAsync(ITelegramBotClient bot, Message msg, CancellationToken ct)
+        public async Task HandleAsync(ITelegramBotClient botClient, Message message, CancellationToken ct)
         {
-            if (!_admins.Contains(msg.From!.Id))
+            if (!_admins.Contains(message.From!.Id))
                 return; // ignoring if not admin
 
-            var parts = msg.Text!.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+            var parts = message.Text!.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length == 1)
             {
-                await bot.SendMessage(msg.Chat.Id,
+                await botClient.SendMessage(message.Chat.Id,
                     "Доступные команды:\n" +
                     "/admin userscount - количество пользователй\n" +
                     "/admin broadcast [Текст] - рассылка всем пользователям\n",
@@ -48,17 +48,17 @@ namespace MyUpdatedBot.Core.Handlers
             if (cmd.StartsWith("userscount", StringComparison.OrdinalIgnoreCase))
             {
                 var total = await _stats.GetTotalUsersAsync(ct);
-                await bot.SendMessage(msg.Chat.Id, $"Всего пользователей: {total}", cancellationToken: ct);
+                await botClient.SendMessage(message.Chat.Id, $"Всего пользователей: {total}", cancellationToken: ct);
             }
             else if (cmd.StartsWith("broadcast ", StringComparison.OrdinalIgnoreCase))
             {
                 var text = cmd.Substring("broadcast ".Length);
                 await _bcast.BroadcastAsync(text, ct);
-                await bot.SendMessage(msg.Chat.Id, "Рассылка отправлена.", cancellationToken: ct);
+                await botClient.SendMessage(message.Chat.Id, "Рассылка отправлена.", cancellationToken: ct);
             }
             else
             {
-                await bot.SendMessage(msg.Chat.Id, "Неизвестная подкоманда.", cancellationToken: ct);
+                await botClient.SendMessage(message.Chat.Id, "Неизвестная подкоманда.", cancellationToken: ct);
             }
         }
     }

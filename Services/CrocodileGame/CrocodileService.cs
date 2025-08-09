@@ -15,13 +15,13 @@ namespace MyUpdatedBot.Services.CrocodileGame
     {
         private readonly ConcurrentDictionary<long, GameState> _games = new();
         private readonly WordRepository _repo;
-        private readonly ITelegramBotClient _bot;
+        private readonly ITelegramBotClient _botClient;
         private readonly ILogger<CrocodileService> _logger;
 
-        public CrocodileService(WordRepository repo, ITelegramBotClient bot, ILogger<CrocodileService> logger)
+        public CrocodileService(WordRepository repo, ITelegramBotClient botClient, ILogger<CrocodileService> logger)
         {
             _repo = repo;
-            _bot = bot;
+            _botClient = botClient;
             _logger = logger;
         }
 
@@ -39,14 +39,14 @@ namespace MyUpdatedBot.Services.CrocodileGame
 
             _logger.LogInformation("[CrocodileService]: start the game in chat {ChatId} with host {UserId}. Guessed word: {Word}", chatId, userId, word);
 
-            var state = new GameState(chatId, userId, word, onTimeout: async cid =>
+            var state = new GameState(chatId, userId, word, onTimeout: async chatId =>
             {
                 //  inform users that the game has ended by timeout
-                await _bot.SendMessage(
-                  chatId: cid,
+                await _botClient.SendMessage(
+                  chatId: chatId,
                   text: "⏰ Время игры истекло! Чтобы начать новую — отправьте /crocodile",
                   parseMode: ParseMode.Markdown);
-                EndGame(cid);
+                EndGame(chatId);
             });
             _games[chatId] = state;
             return true;

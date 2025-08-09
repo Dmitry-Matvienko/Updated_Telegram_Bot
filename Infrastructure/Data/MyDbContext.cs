@@ -7,7 +7,7 @@ namespace MyUpdatedBot.Infrastructure.Data
     {
         public DbSet<UserEntity> Users { get; set; } = default!;
         public DbSet<MessageCountEntity> MessageStats { get; set; } = default!;
-        public DbSet<RatingEntity> RatingStats { get; set; } = default!;
+        public DbSet<ReputationEntity> RatingStats { get; set; } = default!; // TODO: Rename to  ReputationStats and update DB
 
         public MyDbContext(DbContextOptions<MyDbContext> opts) : base(opts) { }
 
@@ -27,12 +27,12 @@ namespace MyUpdatedBot.Infrastructure.Data
                 .HasForeignKey(ms => ms.UserRefId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<RatingEntity>()
+            modelBuilder.Entity<ReputationEntity>()
               .HasKey(l => l.Id);
-            modelBuilder.Entity<RatingEntity>()
+            modelBuilder.Entity<ReputationEntity>()
               .HasIndex(l => new { l.UserRefId, l.ChatId })
               .IsUnique();
-            modelBuilder.Entity<RatingEntity>()
+            modelBuilder.Entity<ReputationEntity>()
               .HasOne(l => l.User)
               .WithMany(u => u.RatingStats)
               .HasForeignKey(l => l.UserRefId);

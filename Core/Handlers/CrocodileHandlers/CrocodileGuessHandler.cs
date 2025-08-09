@@ -16,33 +16,33 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
     public class CrocodileGuessHandler : ICommandHandler
     {
         private readonly ICrocodileService _games;
-        public CrocodileGuessHandler(ICrocodileService games) => _games = games;
 
+        public CrocodileGuessHandler(ICrocodileService games) => _games = games;
         public bool CanHandle(string text)
         {
             return !string.IsNullOrWhiteSpace(text)
                    && !text.StartsWith("/");
         }
 
-        public async Task HandleAsync(ITelegramBotClient bot, Message msg, CancellationToken ct)
+        public async Task HandleAsync(ITelegramBotClient botClient, Message message, CancellationToken ct)
         {
-            var chatId = msg.Chat.Id;
-            var text = msg.Text ?? "";
+            var chatId = message.Chat.Id;
+            var text = message.Text ?? "";
 
             // leave if there is no game going on in this chat room
             if (!_games.HasGame(chatId))
                 return;
             // take state and ignoring host
-            if (_games.TryGetGameState(chatId, out var state) && state.HostUserId == msg.From!.Id)
+            if (_games.TryGetGameState(chatId, out var state) && state.HostUserId == message.From!.Id)
             {
                 return;
             }
 
-            if (_games.TryGuess(chatId, msg.From!.Id, text, out var correct) && correct)
+            if (_games.TryGuess(chatId, message.From!.Id, text, out var correct) && correct)
             {
-                var winnerMention = $"[{msg.From.FirstName}](tg://user?id={msg.From.Id})";
+                var winnerMention = $"[{message.From.FirstName}](tg://user?id={message.From.Id})";
 
-                await bot.SendMessage(
+                await botClient.SendMessage(
                     chatId: chatId,
                     text: $"🎉 {winnerMention} угадал(а) слово! Правильный ответ: *{state.CurrentWord}*\n\n" +
                     $"Чтобы начать новую игру, нажми: /crocodile",

@@ -9,14 +9,14 @@ using Telegram.Bot.Types.Enums;
 
 namespace MyUpdatedBot.Core.Handlers
 {
-    public class MessageRateHandler : ICommandHandler
+    public class TopMessageCountHandler : ICommandHandler
     {
-        private readonly IUserLeaderboardService _statsQuery;
-        private readonly ILogger<MessageRateHandler> _logger;
+        private readonly IUserLeaderboardService _userLeaderboard;
+        private readonly ILogger<TopMessageCountHandler> _logger;
 
-        public MessageRateHandler(IUserLeaderboardService statsQuery, ILogger<MessageRateHandler> logger)
+        public TopMessageCountHandler(IUserLeaderboardService userLeaderboard, ILogger<TopMessageCountHandler> logger)
         {
-            _statsQuery = statsQuery;
+            _userLeaderboard = userLeaderboard;
             _logger = logger;
         }
 
@@ -27,13 +27,13 @@ namespace MyUpdatedBot.Core.Handlers
                 || text.StartsWith("/LocalMessage", StringComparison.OrdinalIgnoreCase);
         }
 
-        public async Task HandleAsync(ITelegramBotClient client, Message message, CancellationToken ct)
+        public async Task HandleAsync(ITelegramBotClient botClient, Message message, CancellationToken ct)
         {
 
             var cmd = message.Text!.Trim().ToLowerInvariant();
             bool isLocal = cmd.Contains("local");
             
-            var resultText = await _statsQuery.TopTen(
+            var resultText = await _userLeaderboard.TopTen(
                 chatIdFilter: isLocal ? message.Chat.Id : (long?) null,
                 isRating: false, // isRating = false - count the number of messages, not rating.
                 UserId: message.From!.Id,
@@ -42,7 +42,7 @@ namespace MyUpdatedBot.Core.Handlers
             _logger.LogInformation(
                 "[MessageRateHandler]: Sending message stats to chat {ChatId}", message.Chat.Id);
 
-            await client.SendMessage(
+            await botClient.SendMessage(
                 chatId: message.Chat.Id,
                 text: resultText,
                 parseMode: ParseMode.Markdown,
