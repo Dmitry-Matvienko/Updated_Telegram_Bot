@@ -6,14 +6,16 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyUpdatedBot.Core.Handlers;
 using MyUpdatedBot.Core.Handlers.CrocodileHandlers;
+using MyUpdatedBot.Core.Handlers.RollGameHandlers;
 using MyUpdatedBot.Core.Models;
 using MyUpdatedBot.Infrastructure;
 using MyUpdatedBot.Infrastructure.Data;
-using MyUpdatedBot.Services.OwnerTools;
 using MyUpdatedBot.Services.CrocodileGame;
-using MyUpdatedBot.Services.UserReputation;
 using MyUpdatedBot.Services.MessageStats;
+using MyUpdatedBot.Services.OwnerTools;
+using MyUpdatedBot.Services.RollGame;
 using MyUpdatedBot.Services.UserLeaderboard;
+using MyUpdatedBot.Services.UserReputation;
 using Serilog;
 using Telegram.Bot;
 
@@ -59,6 +61,9 @@ try
             services.AddSingleton<ICrocodileService, CrocodileService>();
             services.AddSingleton<WordRepository>();
 
+            // Roll game
+            services.AddSingleton<IRollService, RollService>();
+
             // Message statistics service and hosted service for counter of messages
             services.AddSingleton<MessageCountService>();
             services.AddSingleton<IMessageCountStatsService>(sp => sp.GetRequiredService<MessageCountService>());
@@ -88,9 +93,11 @@ try
             services.AddTransient<ICommandHandler, CrocodileHandler>();
             services.AddTransient<ICommandHandler, CrocodileGuessHandler>();
             services.AddTransient<ICommandHandler, OwnerCommandHandler>();
+            services.AddTransient<ICommandHandler, RollGameHandler>();
 
             // Button handlers
             services.AddTransient<IButtonHandlers, CrocodileButtonHandler>();
+            services.AddTransient<IButtonHandlers, RollGameButtonHandler>();
 
         })
         .ConfigureLogging(log =>
