@@ -7,10 +7,13 @@
 - **User registration** upon any first message
 - **Message counting** (MessageStatsService) with buffering and periodic DB recording
 - **Ranking system** based on the number of messages
-- **Rating system** (in `ReplyToMessage`) with flood protection
-- **Local(in a group) and global top-10** by messages and rating
-- Flexible **architecture** based on `ICommandHandler`, `HostedService`, DI-container
+- **Reputation system** (in `ReplyToMessage`) with flood protection
+- **Local(in a group) and global top-10** by messages and raputation
+- Flexible **architecture**
 - Logging via **Serilog** (configuration via `appsettings.json` + reloadOnChange)
+- **Tools for owner** for user statistics and sending messages in every chat
+- Popular **Crocodile game** for groups. List of words are in  `crocodile-words.txt`
+- **RollGame** with leaderbord of every game
 
 ## Project structure
 
@@ -44,15 +47,24 @@ Migrations/     # EF Core migrations
    ```bash
    dotnet user-secrets init
    dotnet user-secrets set "TelegramBot:Token" "<your-bot-token>"
+   dotnet user-secrets set "Admin:Ids:0" "<Owner id(s)>"
    ```
    Or set an environment variable:
    - Windows PowerShell:
      ```powershell
      $Env:TelegramBot__Token = "<your-bot-token>"
      ```
+	 
+	 ```powershell
+	 $Env:Admin__Ids__0 = "123456789"
+	 ```
    - Linux/macOS Bash:
      ```bash
-     export TelegramBot__Token="<your-bot-token>"
+     export TelegramBot__Token= "<your-bot-token>"
+     ```
+	 
+	 ```bash
+     export Admin__Ids__0 = "123456789"
      ```
 
 3. Set the connection string in `appsettings.json`:
@@ -80,13 +92,15 @@ Migrations/     # EF Core migrations
 - `/LocalRating` — local top-10 by “thank you” rating
 - `/GlobalRating` — global top-10 in the “thank you” rating
 - **Reply to user** «спасибо» or «благодарю» — give the user a +1 rating (with flood protection)
+- `/CrocodileGame` — the game “crocodile” where users have to guess the word
+- `/StartRoll` — a “roll the dice” game with values from 1 to 100 and a leaderboard
 
 ## Architecture
 
 - **BotHostedService**: starts polling and delegates updates to `UpdateDispatcher` via DI-scoped `IUpdateHandlerService`.
 - **UpdateDispatcher**: iterates through all `ICommandHandler`s, calls `CanHandle` + `HandleAsync`.
-- **MessageStatsService**: background service with `Channel<>`, batching `MessageCountEntity`.
-- **RatingService**: a separate service for rating logic and obtaining top rankings.
+- **MessageCountStatsService**: background service with `Channel<>`, batching `MessageCountEntity`.
+- **UserLeaderboard**: a separate service logic and obtaining top rankings.
 - **EF Core**: `MyDbContext` with `DbSet<UserEntity>`, `MessageStats`, `RatingStats`.
 - **Serilog**: configured via `appsettings.json` + `UseSerilog(...).ReadFrom.Configuration(..., reloadOnChange:true)`.
 
