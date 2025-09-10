@@ -1,11 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using MyUpdatedBot.Core.Models;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 
@@ -39,15 +34,29 @@ namespace MyUpdatedBot.Services.CrocodileGame
 
             _logger.LogInformation("[CrocodileService]: start the game in chat {ChatId} with host {UserId}. Guessed word: {Word}", chatId, userId, word);
 
-            var state = new GameState(chatId, userId, word, onTimeout: async chatId =>
+            var state = new GameState(chatId, userId, word, onTimeout: async cid =>
             {
-                //  inform users that the game has ended by timeout
-                await _botClient.SendMessage(
-                  chatId: chatId,
-                  text: "⏰ Время игры истекло! Чтобы начать новую — отправьте /crocodile",
-                  parseMode: ParseMode.Markdown);
-                EndGame(chatId);
+                try
+                {
+                    await _botClient.SendMessage(
+                        chatId: cid,
+                        text: "⏰ Время игры истекло! Чтобы начать новую — отправьте /crocodile",
+                        parseMode: ParseMode.Markdown);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[CrocodileService]: timeout handler failed while sending message for chat {ChatId}", cid);
+                }
+                finally
+                {
+                    try { EndGame(cid); }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "[CrocodileService]: EndGame failed in timeout handler for chat {ChatId}", cid);
+                    }
+                }
             });
+
             _games[chatId] = state;
             return true;
         }
@@ -91,7 +100,11 @@ namespace MyUpdatedBot.Services.CrocodileGame
         {
             if (_games.TryRemove(chatId, out var state))
             {
-                //_botClient.SendMessage(chatId, "Игра окончена");
+                try { state.Dispose(); }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "[CrocodileService]: disposing GameState failed for chat {ChatId}", chatId);
+                }
             }
             _logger.LogInformation("[CrocodileService]: EndGame the game ended in chat {ChatId}", chatId);
         }

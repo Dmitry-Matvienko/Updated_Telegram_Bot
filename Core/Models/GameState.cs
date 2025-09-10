@@ -1,45 +1,61 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MyUpdatedBot.Core.Models
+﻿namespace MyUpdatedBot.Core.Models
 {
-    public class GameState
+    public class GameState : IDisposable
     {
         public long ChatId { get; }
         public long HostUserId { get; set; }
         public string CurrentWord { get; set; }
 
-        // Callback that is called by timeout
-        private CancellationTokenSource ?_timeoutCts;
+        private CancellationTokenSource? Cts;
+        private CancellationTokenRegistration _timeoutRegistration;
         private readonly Func<long, Task> _onTimeoutAsync;
+        private readonly TimeSpan _timeout;
 
-        public GameState(long chatId, long hostUserId, string word, Func<long, Task> onTimeout)
+        public GameState(long chatId, long hostUserId, string word, Func<long, Task> onTimeout, TimeSpan? timeout = null)
         {
             ChatId = chatId;
             HostUserId = hostUserId;
             CurrentWord = word;
             _onTimeoutAsync = onTimeout;
+            _timeout = timeout ?? TimeSpan.FromMinutes(1);
             ResetTimeout();
         }
 
         public void ResetTimeout()
         {
-            // delete old
-            _timeoutCts?.Cancel();
-            _timeoutCts?.Dispose();
+            // unsubscribe the previous registration if there was one and cancel/dispose of the old CTS.
+            try { _timeoutRegistration.Dispose(); } catch { }
+            try { Cts?.Cancel(); } catch { }
+            try { Cts?.Dispose(); } catch { }
 
-            // create new
-            _timeoutCts = new CancellationTokenSource();
+            Cts = new CancellationTokenSource();
 
-            _timeoutCts.Token.Register(() =>
+            // keep the registration so that can unsubscribe when the game end manually
+            _timeoutRegistration = Cts.Token.Register(() =>
             {
-                _ = _onTimeoutAsync(ChatId);
+                var task = _onTimeoutAsync(ChatId);
+                task.ContinueWith(t =>
+                {
+                    var ignored = t.Exception;
+                }, TaskContinuationOptions.OnlyOnFaulted);
             });
 
-            _timeoutCts.CancelAfter(TimeSpan.FromMinutes(15));
+            Cts.CancelAfter(_timeout);
+        }
+
+        // called when manually closinh. unsubscribe before canceling
+        public void CancelTimeout()
+        {
+            try { _timeoutRegistration.Dispose(); } catch { }
+            try { Cts?.Cancel(); } catch { }
+            try { Cts?.Dispose(); } catch { }
+        }
+
+        public void Dispose()
+        {
+            try { _timeoutRegistration.Dispose(); } catch { }
+            try { Cts?.Cancel(); } catch { }
+            try { Cts?.Dispose(); } catch { }
         }
     }
 }
