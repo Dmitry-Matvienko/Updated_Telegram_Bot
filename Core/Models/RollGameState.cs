@@ -9,6 +9,7 @@ namespace MyUpdatedBot.Core.Models
         public int Value { get; init; }
         public DateTime At { get; init; } = DateTime.UtcNow;
     }
+
     public class RollGameState : IDisposable
     {
         public Guid EventId { get; } = Guid.NewGuid();
@@ -21,6 +22,7 @@ namespace MyUpdatedBot.Core.Models
         public ConcurrentDictionary<long, RollResult> Results { get; } = new();
         public SemaphoreSlim EditLock { get; } = new SemaphoreSlim(1, 1);
 
+        private CancellationTokenRegistration _timeoutRegistration;
         private readonly Func<RollGameState, bool, Task> _onTimeoutAsync;
 
         public RollGameState(long chatId, long hostUserId, TimeSpan duration, Func<RollGameState, bool, Task> onTimeoutAsync)
@@ -28,7 +30,7 @@ namespace MyUpdatedBot.Core.Models
             ChatId = chatId;
             HostUserId = hostUserId;
             Duration = duration;
-            _onTimeoutAsync = onTimeoutAsync;
+            _onTimeoutAsync = onTimeoutAsync ?? throw new ArgumentNullException(nameof(onTimeoutAsync));
             StartTimeout();
         }
 
@@ -36,21 +38,21 @@ namespace MyUpdatedBot.Core.Models
 
         private void StartTimeout()
         {
-            try
-            {
-                Cts?.Cancel();
-                Cts?.Dispose();
-            }
-            catch { }
+            // unsubscribe the previous registration if there was one and cancel/dispose of the old CTS.
+            try { _timeoutRegistration.Dispose(); } catch { }
+            try { Cts?.Cancel(); } catch { }
+            try { Cts?.Dispose(); } catch { }
 
             Cts = new CancellationTokenSource();
 
-            // Register is synchronously in ThreadPool, so launch an async handler.
-            Cts.Token.Register(() =>
+            // keep the registration so that can unsubscribe when the game end manually
+            _timeoutRegistration = Cts.Token.Register(() =>
             {
-                var task = _onTimeoutAsync(this, true);
-                task.ContinueWith(t =>
+                // fire and forget
+                var t = _onTimeoutAsync(this, true);
+                t.ContinueWith(ct =>
                 {
+                    var ignored = ct.Exception;
                 }, TaskContinuationOptions.OnlyOnFaulted);
             });
 
@@ -61,12 +63,14 @@ namespace MyUpdatedBot.Core.Models
 
         public void CancelTimeout()
         {
-            try { Cts?.Cancel(); }
-            catch { }
+            try { _timeoutRegistration.Dispose(); } catch { }
+            try { Cts?.Cancel(); } catch { }
+            try { Cts?.Dispose(); } catch { }
         }
 
         public void Dispose()
         {
+            try { _timeoutRegistration.Dispose(); } catch { }
             try { Cts?.Cancel(); } catch { }
             try { Cts?.Dispose(); } catch { }
             try { EditLock?.Dispose(); } catch { }

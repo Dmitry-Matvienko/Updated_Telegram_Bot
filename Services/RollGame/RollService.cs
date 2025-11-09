@@ -99,24 +99,42 @@ namespace MyUpdatedBot.Services.RollGame
 
         public bool StopEvent(Guid eventId)
         {
-            if (_events.TryRemove(eventId, out var s))
+            // try to get the status to turn off the timer
+            if (!_events.TryGetValue(eventId, out var state))
             {
-                try
-                {
-                    s.CancelTimeout();
-                    s.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "[IRollService]: StopEvent error while disposing state for event {EventId}", eventId);
-                }
-
-                _logger.LogInformation("[IRollService]: StopEvent event {EventId} stopped by host {HostUserId}", eventId, s.HostUserId);
-                return true;
+                _logger.LogWarning("[IRollService]: StopEvent event {EventId} not found", eventId);
+                return false;
             }
 
-            _logger.LogWarning("[IRollService]: StopEvent event {EventId} not found", eventId);
-            return false;
+            // minimize the chance of a timeout callback
+            try
+            {
+                state.CancelTimeout();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[IRollService]: StopEvent failed to cancel timeout for event {EventId}", eventId);
+            }
+
+            // atomically remove from dictionary
+            if (!_events.TryRemove(eventId, out var removedState))
+            {
+                _logger.LogWarning("[IRollService]: StopEvent event {EventId} already removed by another thread", eventId);
+                return false;
+            }
+
+            // safe dispse
+            try
+            {
+                removedState.Dispose();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[IRollService]: StopEvent error while disposing state for event {EventId}", eventId);
+            }
+
+            _logger.LogInformation("[IRollService]: StopEvent event {EventId} stopped by host {HostUserId}", eventId, removedState.HostUserId);
+            return true;
         }
 
         private Task OnEventEndedAsync(Guid eventId, bool timedOut)
