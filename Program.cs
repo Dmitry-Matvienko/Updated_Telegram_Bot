@@ -94,6 +94,7 @@ try
             services.AddTransient<ICommandHandler, CrocodileGuessHandler>();
             services.AddTransient<ICommandHandler, OwnerCommandHandler>();
             services.AddTransient<ICommandHandler, RollGameHandler>();
+            services.AddTransient<ICommandHandler, ReportHandler>();
 
             // Button handlers
             services.AddTransient<IButtonHandlers, CrocodileButtonHandler>();
