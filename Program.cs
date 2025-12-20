@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyUpdatedBot.Core.Handlers;
 using MyUpdatedBot.Core.Handlers.CrocodileHandlers;
+using MyUpdatedBot.Core.Handlers.ReportHandlers;
 using MyUpdatedBot.Core.Handlers.RollGameHandlers;
 using MyUpdatedBot.Core.Models;
 using MyUpdatedBot.Infrastructure;
@@ -99,6 +100,7 @@ try
             // Button handlers
             services.AddTransient<IButtonHandlers, CrocodileButtonHandler>();
             services.AddTransient<IButtonHandlers, RollGameButtonHandler>();
+            services.AddTransient<IButtonHandlers, AdminReportCallbackHandler>();
 
         })
         .ConfigureLogging(log =>
