@@ -1,13 +1,19 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Net;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace MyUpdatedBot.Core.Handlers.ReportHandlers
 {
     public class AdminReportCallbackHandler : IButtonHandlers
     {
         private readonly ILogger<AdminReportCallbackHandler > _logger;
+        private static readonly ConcurrentDictionary<(long sourceChat, int sourceMessageId, long targetUser), ProcessedInfo> _processed = new();
+        record ProcessedInfo(string Action, long AdminId, string AdminName, DateTime When);
 
         public AdminReportCallbackHandler (ILogger<AdminReportCallbackHandler > logger)
         {
@@ -27,7 +33,7 @@ namespace MyUpdatedBot.Core.Handlers.ReportHandlers
                 return;
             }
 
-            if (!long.TryParse(parts[1], out var chatId) ||
+            if (!long.TryParse(parts[1], out var sourceChatId) ||
                 !int.TryParse(parts[2], out var messageId) ||
                 !long.TryParse(parts[3], out var targetUserId))
             {
@@ -39,7 +45,7 @@ namespace MyUpdatedBot.Core.Handlers.ReportHandlers
 
             try
             {
-                var member = await botClient.GetChatMember(chatId, callback.From.Id, ct);
+                var member = await botClient.GetChatMember(sourceChatId, callback.From.Id, ct);
                 var isAdmin = member.Status == Telegram.Bot.Types.Enums.ChatMemberStatus.Administrator
                            || member.Status == Telegram.Bot.Types.Enums.ChatMemberStatus.Creator;
                 if (!isAdmin)
@@ -50,59 +56,129 @@ namespace MyUpdatedBot.Core.Handlers.ReportHandlers
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "[AdminReportCallbackHandler]: Failed to verify admin rights {AdminId} in chat {ChatId}", callback.From.Id, chatId);
+                _logger.LogWarning(ex, "[AdminReportCallbackHandler]: Failed to verify admin rights {AdminId} in chat {ChatId}", callback.From.Id, sourceChatId);
                 await botClient.AnswerCallbackQuery(callback.Id, "Не удалось проверить ваши права.", showAlert: true, cancellationToken: ct);
                 return;
             }
 
-            switch (action)
+            var complaintKey = (sourceChat: sourceChatId, sourceMessageId: messageId, targetUser: targetUserId);
+
+            // Notify if complaint has already processed
+            if (_processed.TryGetValue(complaintKey, out var alreadyAction))
             {
-                case "ignore":
-                    await botClient.AnswerCallbackQuery(callback.Id, "Пометка: игнорировано", showAlert: true, cancellationToken: ct);
-                    break;
+                await botClient.AnswerCallbackQuery(callback.Id,
+                    $"Жалоба уже обработана ({alreadyAction.Action}) админом {alreadyAction.AdminName} в {alreadyAction.When}.",
+                    showAlert: true, cancellationToken: ct);
 
-                case "mute30":
-                    try
-                    {
-                        var until = DateTime.UtcNow.AddMinutes(30);
-                        var permissions = new Telegram.Bot.Types.ChatPermissions
+                await MarkAdminMessageProcessedAsync(botClient, callback, ct, alreadyAction);
+                return;
+            }
+
+            var adminName = callback.From.Username ?? callback.From.FirstName ?? callback.From.Id.ToString();
+            var info = new ProcessedInfo(action, callback.From.Id, adminName, DateTime.UtcNow);
+
+            if (!_processed.TryAdd(complaintKey, info))
+            {
+                _processed.TryGetValue(complaintKey, out var existingInfo);
+                await botClient.AnswerCallbackQuery(callback.Id, $"Жалоба уже обработана ({existingInfo}).", showAlert: true, cancellationToken: ct);
+                await MarkAdminMessageProcessedAsync(botClient, callback, ct, existingInfo);
+                return;
+            }
+
+            try
+            {
+                switch (action)
+                {
+                    case "ignore":
+                        await botClient.AnswerCallbackQuery(callback.Id, "Пометка: игнорировано", showAlert: true, cancellationToken: ct);
+                        await MarkAdminMessageProcessedAsync(botClient, callback, ct, info);
+                        break;
+
+                    case "mute30":
+                        try
                         {
-                            CanSendMessages = false,
-                            CanSendOtherMessages = false,
-                        };
-                        await botClient.RestrictChatMember(chatId, targetUserId, permissions, untilDate: until, cancellationToken: ct);
-                        await botClient.AnswerCallbackQuery(callback.Id, "Пользователь заглушён на 30 мин.", showAlert: true, cancellationToken: ct);
-                        await botClient.SendMessage(chatId,
-                            $"⏳ Пользователь [id{targetUserId}](tg://user?id={targetUserId}) заглушён на 30 мин. (по решению администратора)",
-                            ParseMode.Markdown,
-                            cancellationToken: ct);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "[AdminReportCallbackHandler]: Failed to mute user {User} in chat {Chat}. Bot hasn't rights", targetUserId, chatId);
-                        await botClient.AnswerCallbackQuery(callback.Id, "Не удалось заглушить пользователя. Проверьте права бота.", showAlert: true, cancellationToken: ct);
-                    }
-                    break;
+                            var until = DateTime.UtcNow.AddMinutes(30);
+                            var permissions = new Telegram.Bot.Types.ChatPermissions
+                            {
+                                CanSendMessages = false,
+                                CanSendOtherMessages = false,
+                            };
+                            await botClient.RestrictChatMember(sourceChatId, targetUserId, permissions, untilDate: until, cancellationToken: ct);
 
-                case "ban":
-                    try
-                    {
-                        await botClient.BanChatMember(chatId, targetUserId, cancellationToken: ct);
-                        await botClient.AnswerCallbackQuery(callback.Id, "Пользователь забанен.", showAlert: true, cancellationToken: ct);
-                        await botClient.SendMessage(chatId,
-                            $"⛔ Пользователь [id{targetUserId}](tg://user?id={targetUserId}) заблокирован (по решению администратора).",
-                            ParseMode.Markdown, cancellationToken: ct);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "[AdminReportCallbackHandler]: Failed to ban user {User} in chat {Chat}. Bot hasn't rights", targetUserId, chatId);
-                        await botClient.AnswerCallbackQuery(callback.Id, "Не удалось забанить пользователя. Проверьте права бота.", showAlert: true, cancellationToken: ct);
-                    }
-                    break;
+                            await botClient.AnswerCallbackQuery(callback.Id, "Пользователь заглушён на 30 минут.", showAlert: true, cancellationToken: ct);
+                            await botClient.SendMessage(sourceChatId,
+                                $"⏳ Пользователь [id{targetUserId}](tg://user?id={targetUserId}) заглушён на 30 минут (по решению администратора).",
+                                ParseMode.Markdown,
+                                cancellationToken: ct);
 
-                default:
-                    await botClient.AnswerCallbackQuery(callback.Id, "Неизвестное действие.", showAlert: true, cancellationToken: ct);
-                    break;
+                            await MarkAdminMessageProcessedAsync(botClient, callback, ct, info);
+                        }
+                        catch (Exception ex)
+                        {
+                            _processed.TryRemove(complaintKey, out _);
+                            _logger.LogError(ex, "[AdminReportCallbackHandler]: Failed to mute user {User} in chat {Chat}. Bot hasn't rights", targetUserId, sourceChatId);
+                            await botClient.AnswerCallbackQuery(callback.Id, "Не удалось заглушить пользователя. Проверьте права бота.", showAlert: true, cancellationToken: ct);
+                        }
+                        break;
+
+                    case "ban":
+                        try
+                        {
+                            await botClient.BanChatMember(sourceChatId, targetUserId, cancellationToken: ct);
+                            await botClient.AnswerCallbackQuery(callback.Id, "Пользователь забанен.", showAlert: true, cancellationToken: ct);
+                            await botClient.SendMessage(sourceChatId,
+                                $"⛔ Пользователь [id{targetUserId}](tg://user?id={targetUserId}) заблокирован (по решению администратора).",
+                                ParseMode.Markdown, cancellationToken: ct);
+
+                            await MarkAdminMessageProcessedAsync(botClient, callback, ct, info);
+                        }
+                        catch (Exception ex)
+                        {
+                            _processed.TryRemove(complaintKey, out _);
+                            _logger.LogError(ex, "[AdminReportCallbackHandler]: Failed to ban user {User} in chat {Chat}. Bot hasn't rights", targetUserId, sourceChatId);
+                            await botClient.AnswerCallbackQuery(callback.Id, "Не удалось забанить пользователя. Проверьте права бота.", showAlert: true, cancellationToken: ct);
+                        }
+                        break;
+
+                    default:
+                        _processed.TryRemove(complaintKey, out _);
+                        await botClient.AnswerCallbackQuery(callback.Id, "Неизвестное действие.", showAlert: true, cancellationToken: ct);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _processed.TryRemove(complaintKey, out _);
+                _logger.LogError(ex, "[AdminReportCallbackHandler]: Unexpected error while processing complaint {Key}", complaintKey);
+                await botClient.AnswerCallbackQuery(callback.Id, "Ошибка при обработке. Попробуйте снова.", showAlert: true, cancellationToken: ct);
+            }
+        }
+
+        private static async Task MarkAdminMessageProcessedAsync(ITelegramBotClient botClient, CallbackQuery callback, CancellationToken ct, ProcessedInfo info)
+        {
+            try
+            {
+                if (callback.Message == null)
+                {
+                    await botClient.AnswerCallbackQuery(callback.Id, "Готово.", showAlert: false, cancellationToken: ct);
+                    return;
+                }
+
+                var chatId = callback.Message.Chat.Id;
+                var messageId = callback.Message.MessageId;
+                var originalText = callback.Message.Text ?? callback.Message.Caption ?? "";
+
+                var adminLabel = string.IsNullOrWhiteSpace(info.AdminName)
+                                 ? info.AdminId.ToString()
+                                 : info.AdminName;
+
+                var markup = new InlineKeyboardMarkup(new[] { new[] {InlineKeyboardButton.WithCallbackData($"✅ Обработано {adminLabel} ({info.Action})", "processed") } });
+
+                await botClient.EditMessageReplyMarkup(chatId: chatId, messageId: messageId, replyMarkup: markup, cancellationToken: ct);
+            }
+            catch
+            {
+                try { await botClient.AnswerCallbackQuery(callback.Id, "Готово.", showAlert: false, cancellationToken: ct); } catch { }
             }
         }
     }
