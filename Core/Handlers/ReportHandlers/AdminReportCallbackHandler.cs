@@ -74,7 +74,7 @@ namespace MyUpdatedBot.Core.Handlers.ReportHandlers
                 return;
             }
 
-            var adminName = callback.From.Username ?? callback.From.FirstName ?? callback.From.Id.ToString();
+            var adminName = callback.From.FirstName ?? callback.From.Username ?? callback.From.Id.ToString();
             var info = new ProcessedInfo(action, callback.From.Id, adminName, DateTime.UtcNow);
 
             if (!_processed.TryAdd(complaintKey, info))
@@ -90,7 +90,7 @@ namespace MyUpdatedBot.Core.Handlers.ReportHandlers
                 switch (action)
                 {
                     case "ignore":
-                        await botClient.AnswerCallbackQuery(callback.Id, "Пометка: игнорировано", showAlert: true, cancellationToken: ct);
+                        await botClient.AnswerCallbackQuery(callback.Id, "Жалоба проигнорирована", showAlert: true, cancellationToken: ct);
                         await MarkAdminMessageProcessedAsync(botClient, callback, ct, info);
                         break;
 
@@ -172,14 +172,19 @@ namespace MyUpdatedBot.Core.Handlers.ReportHandlers
                                  ? info.AdminId.ToString()
                                  : info.AdminName;
 
-                var markup = new InlineKeyboardMarkup(new[] { new[] {InlineKeyboardButton.WithCallbackData($"✅ Обработано {adminLabel} ({info.Action})", "processed") } });
+                var time = (int)(DateTime.UtcNow - info.When).TotalMinutes;
 
-                await botClient.EditMessageReplyMarkup(chatId: chatId, messageId: messageId, replyMarkup: markup, cancellationToken: ct);
+                var processedText = originalText + $"\n\n✅ Обработано админом [{adminLabel}](tg://user?id={info.AdminId})" +
+                    $" {time} минут назад\nВыбранное действие: **{info.Action}**";
+
+                await botClient.EditMessageText(chatId: chatId, messageId: messageId, processedText, parseMode: ParseMode.Markdown, cancellationToken: ct);
             }
             catch
             {
                 try { await botClient.AnswerCallbackQuery(callback.Id, "Готово.", showAlert: false, cancellationToken: ct); } catch { }
             }
         }
+
+
     }
 }
