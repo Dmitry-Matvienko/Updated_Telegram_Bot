@@ -13,7 +13,8 @@
 - Logging via **Serilog** (configuration via `appsettings.json` + reloadOnChange)
 - **Tools for owner** for user statistics and sending messages in every chat
 - Popular **Crocodile game** for groups. List of words are in  `crocodile-words.txt`
-- **RollGame** with leaderbord of every game
+- **RollGame** is a quick game `roll the dice` (value 1–100). The result is recorded and displayed in the leaderboard.
+- **User reports** — users can send complaints to admins using the commands `!админ` or `!report`. The admin receives the complaint and processes it
 
 ## Project structure
 
@@ -94,13 +95,15 @@ Migrations/     # EF Core migrations
 - **Reply to user** «спасибо» or «благодарю» — give the user a +1 rating (with flood protection)
 - `/CrocodileGame` — the game “crocodile” where users have to guess the word
 - `/StartRoll` — a “roll the dice” game with values from 1 to 100 and a leaderboard
+- **Reply to user** «!админ» or «!report» to send a complaint to the admins
 
 ## Architecture
 
+- **Startup / DI (Program.cs)**: initialization of configuration, logging, and registration of services/handlers
 - **BotHostedService**: starts polling and delegates updates to `UpdateDispatcher` via DI-scoped `IUpdateHandlerService`.
 - **UpdateDispatcher**: iterates through all `ICommandHandler`s, calls `CanHandle` + `HandleAsync`.
 - **MessageCountStatsService**: background service with `Channel<>`, batching `MessageCountEntity`.
-- **UserLeaderboard**: a separate service logic and obtaining top rankings.
+- **UserLeaderboard**: service responsible for generating local and global top-10 lists based on messages and ratings
 - **EF Core**: `MyDbContext` with `DbSet<UserEntity>`, `MessageStats`, `RatingStats`.
 - **Serilog**: configured via `appsettings.json` + `UseSerilog(...).ReadFrom.Configuration(..., reloadOnChange:true)`.
 
