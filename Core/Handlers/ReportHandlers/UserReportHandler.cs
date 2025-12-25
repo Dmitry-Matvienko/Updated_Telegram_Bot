@@ -1,24 +1,23 @@
 ﻿using Microsoft.Extensions.Logging;
 using MyUpdatedBot.Core.Handlers;
-using System.Collections.Concurrent;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using MyUpdatedBot.Cache;
 
-public class ReportHandler : ICommandHandler
+public class UserReportHandler : ICommandHandler
 {
-    private readonly ILogger<ReportHandler> _logger;
-
-    // in-memory throttle
-    private static readonly ConcurrentDictionary<(long chat, long user), DateTime> _throttle = new();
+    private readonly ILogger<UserReportHandler> _logger;
+    private readonly IThrottleStore _throttle;
 
     // delay between complaints from one user in one chat
     private readonly TimeSpan _throttleDelay = TimeSpan.FromSeconds(180);
 
-    public ReportHandler(ILogger<ReportHandler> logger)
+    public UserReportHandler(ILogger<UserReportHandler> logger, IThrottleStore throttle)
     {
         _logger = logger;
+        _throttle = throttle;
     }
 
     public bool CanHandle(string text)
@@ -56,17 +55,14 @@ public class ReportHandler : ICommandHandler
 
         // throttle
         var key = (chat: chatId, user: reporterId);
-        var now = DateTime.UtcNow;
-        if (_throttle.TryGetValue(key, out var allowedAfter) && allowedAfter > now)
+        if (!_throttle.TryCheckAndSet(key, _throttleDelay, out var waitSeconds))
         {
-            var wait = (int) (allowedAfter - now).TotalSeconds;
             await botClient.SendMessage(chatId,
-                $"Подожди {wait} сек. прежде чем отправлять следующую жалобу",
+                $"Подожди {waitSeconds} сек. прежде чем отправлять следующую жалобу",
                 replyParameters: message.MessageId,
                 cancellationToken: ct);
             return;
         }
-        _throttle[key] = now.Add(_throttleDelay);
 
         ChatMember[] admins;
         try
@@ -132,7 +128,7 @@ public class ReportHandler : ICommandHandler
             }
         }
 
-        await botClient.DeleteMessage(chatId, messageId: message.MessageId, cancellationToken: ct);
+        try { await botClient.DeleteMessage(chatId, messageId: message.MessageId, cancellationToken: ct); }catch {}
         await botClient.SendMessage(chatId,"Жалоба отправлена администраторам. Спасибо.",cancellationToken: ct);
     }
 }
