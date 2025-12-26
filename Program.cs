@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MyUpdatedBot.Cache;
 using MyUpdatedBot.Core.Handlers;
 using MyUpdatedBot.Core.Handlers.CrocodileHandlers;
 using MyUpdatedBot.Core.Handlers.ReportHandlers;
@@ -11,6 +12,7 @@ using MyUpdatedBot.Core.Handlers.RollGameHandlers;
 using MyUpdatedBot.Core.Models;
 using MyUpdatedBot.Infrastructure;
 using MyUpdatedBot.Infrastructure.Data;
+using MyUpdatedBot.Services.Cleanup;
 using MyUpdatedBot.Services.CrocodileGame;
 using MyUpdatedBot.Services.MessageStats;
 using MyUpdatedBot.Services.OwnerTools;
@@ -19,6 +21,7 @@ using MyUpdatedBot.Services.UserLeaderboard;
 using MyUpdatedBot.Services.UserReputation;
 using Serilog;
 using Telegram.Bot;
+using Microsoft.EntityFrameworkCore.SqlServer.Diagnostics;
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -72,10 +75,18 @@ try
 
             // EF Core
             services.AddDbContext<MyDbContext>(options =>
-                options.UseSqlServer(ctx.Configuration.GetConnectionString("DefaultConnection")));
+               options.UseSqlServer(ctx.Configuration.GetConnectionString("DefaultConnection")));
 
             // Hosted Service for polling
             services.AddHostedService<BotHostedService>();
+
+            // Cleanup hosted service
+            //services.AddHostedService<CleanupHostedService>();
+
+            //Cache
+            services.AddMemoryCache();
+            services.AddSingleton<IThrottleStore, MemoryThrottleStore>();
+            services.AddSingleton<IProcessedStore, ReportsProcessedStore>();
 
             // Other scoped-services
             services.AddScoped<IReputationService, ReputationService>();
@@ -95,18 +106,13 @@ try
             services.AddTransient<ICommandHandler, CrocodileGuessHandler>();
             services.AddTransient<ICommandHandler, OwnerCommandHandler>();
             services.AddTransient<ICommandHandler, RollGameHandler>();
-            services.AddTransient<ICommandHandler, ReportHandler>();
+            services.AddTransient<ICommandHandler, UserReportHandler>();
 
             // Button handlers
             services.AddTransient<IButtonHandlers, CrocodileButtonHandler>();
             services.AddTransient<IButtonHandlers, RollGameButtonHandler>();
             services.AddTransient<IButtonHandlers, AdminReportCallbackHandler>();
 
-        })
-        .ConfigureLogging(log =>
-        {
-            log.ClearProviders();
-            log.AddConsole();
         })
         .Build()
         .RunAsync();
