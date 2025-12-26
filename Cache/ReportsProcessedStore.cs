@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using Serilog;
 using System.Collections.Concurrent;
 
 namespace MyUpdatedBot.Cache
@@ -7,17 +9,31 @@ namespace MyUpdatedBot.Cache
     {
         private readonly ConcurrentDictionary<(long, int, long), ProcessedInfo> _dict = new();
         private readonly IMemoryCache _cache;
+        private readonly ILogger<ReportsProcessedStore> _logger;
         private volatile bool _disposed;
 
-        public ReportsProcessedStore(IMemoryCache cache)
+        public ReportsProcessedStore(IMemoryCache cache, ILogger<ReportsProcessedStore> logger)
         {
             _cache = cache;
+            _logger = logger;
         }
 
         public bool TryGet((long sourceChat, int sourceMessageId, long targetUser) key, out ProcessedInfo info)
         {
             ThrowIfDisposed();
-            return _dict.TryGetValue((key.sourceChat, key.sourceMessageId, key.targetUser), out info);
+            var tupleKey = (key.sourceChat, key.sourceMessageId, key.targetUser);
+
+            var found = _dict.TryGetValue(tupleKey, out info);
+            if (found)
+            {
+                _logger.LogDebug("[ReportsProcessedStore]: HIT for {Key}", GetKey(tupleKey));
+            }
+            else
+            {
+                _logger.LogDebug("[ReportsProcessedStore]: MISS for {Key}", GetKey(tupleKey));
+            }
+
+            return found;
         }
 
         public bool TryAdd((long sourceChat, int sourceMessageId, long targetUser) key, ProcessedInfo info, TimeSpan retention)
@@ -25,8 +41,14 @@ namespace MyUpdatedBot.Cache
             ThrowIfDisposed();
 
             var tupleKey = (key.sourceChat, key.sourceMessageId, key.targetUser);
+
+            _logger.LogDebug("[ReportsProcessedStore]: TryAdd start for {Key} retention={Retention}", GetKey(tupleKey), retention);
+
             if (!_dict.TryAdd(tupleKey, info))
+            {
+                _logger.LogDebug("[ReportsProcessedStore]: TryAdd failed – already present {Key}", GetKey(tupleKey));
                 return false;
+            }
 
             var cacheKey = GetKey(tupleKey);
             var options = new MemoryCacheEntryOptions
@@ -36,19 +58,35 @@ namespace MyUpdatedBot.Cache
 
             options.RegisterPostEvictionCallback((k, v, reason, state) =>
             {
-                if (state is ValueTuple<long, int, long> tk)
-                    _dict.TryRemove(tk, out _);
+                try
+                {
+                    if (state is ValueTuple<long, int, long> stateKey)
+                    {
+                        _dict.TryRemove(stateKey, out _);
+                        _logger.LogDebug("[ReportsProcessedStore]: Evicted {Key} reason={Reason}", k, reason);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("[ReportsProcessedStore]: Evicted {Key} with unexpected state type", k);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[ReportsProcessedStore]: Exception in eviction callback for {Key}", k);
+                }
             }, tupleKey);
 
             try
             {
                 _cache.Set(cacheKey, true, options);
+                _logger.LogDebug("[ReportsProcessedStore]: Marked processed {Key} (retention {Retention})", cacheKey, retention);
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
                 // rollback in case cache set failed
                 _dict.TryRemove(tupleKey, out _);
+                _logger.LogError(ex, "[ReportsProcessedStore]: Failed to set cache key {Key}. Rolled back in-memory mark", cacheKey);
                 throw;
             }
         }
@@ -61,7 +99,14 @@ namespace MyUpdatedBot.Cache
             var removed = _dict.TryRemove(tupleKey, out info);
             if (removed)
             {
-                _cache.Remove(GetKey(tupleKey));
+                try
+                {
+                    _cache.Remove(GetKey(tupleKey));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "[ReportsProcessedStore]: Failed to remove cache entry after TryRemove");
+                }
             }
             return removed;
         }
