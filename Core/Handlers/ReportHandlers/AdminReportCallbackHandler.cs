@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
@@ -6,18 +7,20 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using MyUpdatedBot.Cache;
 
 namespace MyUpdatedBot.Core.Handlers.ReportHandlers
 {
     public class AdminReportCallbackHandler : IButtonHandlers
     {
         private readonly ILogger<AdminReportCallbackHandler > _logger;
-        private static readonly ConcurrentDictionary<(long sourceChat, int sourceMessageId, long targetUser), ProcessedInfo> _processed = new();
-        record ProcessedInfo(string Action, long AdminId, string AdminName, DateTime When);
+        private readonly IProcessedStore _processedStore;
+        private static readonly TimeSpan ProcessedRetention = TimeSpan.FromDays(3);
 
-        public AdminReportCallbackHandler (ILogger<AdminReportCallbackHandler > logger)
+        public AdminReportCallbackHandler (ILogger<AdminReportCallbackHandler > logger, IProcessedStore processedStore)
         {
             _logger = logger;
+            _processedStore = processedStore;
         }
 
         public bool CanHandle(CallbackQuery callback)
@@ -64,24 +67,27 @@ namespace MyUpdatedBot.Core.Handlers.ReportHandlers
             var complaintKey = (sourceChat: sourceChatId, sourceMessageId: messageId, targetUser: targetUserId);
 
             // Notify if complaint has already processed
-            if (_processed.TryGetValue(complaintKey, out var alreadyAction))
+            if (_processedStore.TryGet(complaintKey, out var existing))
             {
                 await botClient.AnswerCallbackQuery(callback.Id,
-                    $"Жалоба уже обработана ({alreadyAction.Action}) админом {alreadyAction.AdminName} в {alreadyAction.When}.",
+                    $"Жалоба уже обработана ({existing.Action}) админом {existing.AdminName}.",
                     showAlert: true, cancellationToken: ct);
 
-                await MarkAdminMessageProcessedAsync(botClient, callback, ct, alreadyAction);
+                await MarkAdminMessageProcessedAsync(botClient, callback, ct, existing);
                 return;
             }
 
             var adminName = callback.From.FirstName ?? callback.From.Username ?? callback.From.Id.ToString();
             var info = new ProcessedInfo(action, callback.From.Id, adminName, DateTime.UtcNow);
 
-            if (!_processed.TryAdd(complaintKey, info))
+            if (!_processedStore.TryAdd(complaintKey, info, ProcessedRetention))
             {
-                _processed.TryGetValue(complaintKey, out var existingInfo);
-                await botClient.AnswerCallbackQuery(callback.Id, $"Жалоба уже обработана ({existingInfo}).", showAlert: true, cancellationToken: ct);
-                await MarkAdminMessageProcessedAsync(botClient, callback, ct, existingInfo);
+                _processedStore.TryGet(complaintKey, out var info2);
+                await botClient.AnswerCallbackQuery(callback.Id,
+                    $"Жалоба уже обработана ({info2?.Action}) админом {info2?.AdminName}.",
+                    showAlert: true, cancellationToken: ct);
+
+                await MarkAdminMessageProcessedAsync(botClient, callback, ct, info2 ?? info);
                 return;
             }
 
@@ -115,7 +121,7 @@ namespace MyUpdatedBot.Core.Handlers.ReportHandlers
                         }
                         catch (Exception ex)
                         {
-                            _processed.TryRemove(complaintKey, out _);
+                            _processedStore.TryRemove(complaintKey, out _);
                             _logger.LogError(ex, "[AdminReportCallbackHandler]: Failed to mute user {User} in chat {Chat}. Bot hasn't rights", targetUserId, sourceChatId);
                             await botClient.AnswerCallbackQuery(callback.Id, "Не удалось заглушить пользователя. Проверьте права бота.", showAlert: true, cancellationToken: ct);
                         }
@@ -134,21 +140,21 @@ namespace MyUpdatedBot.Core.Handlers.ReportHandlers
                         }
                         catch (Exception ex)
                         {
-                            _processed.TryRemove(complaintKey, out _);
+                            _processedStore.TryRemove(complaintKey, out _);
                             _logger.LogError(ex, "[AdminReportCallbackHandler]: Failed to ban user {User} in chat {Chat}. Bot hasn't rights", targetUserId, sourceChatId);
                             await botClient.AnswerCallbackQuery(callback.Id, "Не удалось забанить пользователя. Проверьте права бота.", showAlert: true, cancellationToken: ct);
                         }
                         break;
 
                     default:
-                        _processed.TryRemove(complaintKey, out _);
+                        _processedStore.TryRemove(complaintKey, out _);
                         await botClient.AnswerCallbackQuery(callback.Id, "Неизвестное действие.", showAlert: true, cancellationToken: ct);
                         break;
                 }
             }
             catch (Exception ex)
             {
-                _processed.TryRemove(complaintKey, out _);
+                _processedStore.TryRemove(complaintKey, out _);
                 _logger.LogError(ex, "[AdminReportCallbackHandler]: Unexpected error while processing complaint {Key}", complaintKey);
                 await botClient.AnswerCallbackQuery(callback.Id, "Ошибка при обработке. Попробуйте снова.", showAlert: true, cancellationToken: ct);
             }
