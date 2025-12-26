@@ -103,6 +103,7 @@ Migrations/     # EF Core migrations
 - **BotHostedService**: starts polling and delegates updates to `UpdateDispatcher` via DI-scoped `IUpdateHandlerService`.
 - **UpdateDispatcher**: iterates through all `ICommandHandler`s, calls `CanHandle` + `HandleAsync`.
 - **MessageCountStatsService**: background service with `Channel<>`, batching `MessageCountEntity`.
+- Using **IMemoryCache** to store temporary data with its own `TTL`
 - **UserLeaderboard**: service responsible for generating local and global top-10 lists based on messages and ratings
 - **EF Core**: `MyDbContext` with `DbSet<UserEntity>`, `MessageStats`, `RatingStats`.
 - **Serilog**: configured via `appsettings.json` + `UseSerilog(...).ReadFrom.Configuration(..., reloadOnChange:true)`.
