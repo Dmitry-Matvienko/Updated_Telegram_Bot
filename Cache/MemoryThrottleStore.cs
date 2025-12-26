@@ -18,14 +18,14 @@ namespace MyUpdatedBot.Cache
         {
             var cacheKey = GetKey(key);
 
-            _logger.LogDebug("Throttle: TryCheckAndSet start for {CacheKey} ttl={Ttl}s", cacheKey, throttleDelay.TotalSeconds);
+            _logger.LogDebug("[MemoryThrottleStore]: TryCheckAndSet start for {CacheKey} ttl={Ttl}s", cacheKey, throttleDelay.TotalSeconds);
 
             if (_cache.TryGetValue(cacheKey, out long expiryTicks))
             {
                 var remaining = new DateTime(expiryTicks, DateTimeKind.Utc) - DateTime.UtcNow;
                 waitSeconds = remaining.TotalSeconds > 0 ? (int) Math.Ceiling(remaining.TotalSeconds) : 0;
 
-                _logger.LogInformation("Throttle: HIT {CacheKey} remaining={Seconds}s", cacheKey, waitSeconds);
+                _logger.LogInformation("[MemoryThrottleStore]: HIT {CacheKey} remaining={Seconds}s", cacheKey, waitSeconds);
 
                 return false;
             }
