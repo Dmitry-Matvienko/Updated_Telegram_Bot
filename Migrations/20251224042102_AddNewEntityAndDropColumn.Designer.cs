@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyUpdatedBot.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using MyUpdatedBot.Infrastructure.Data;
 namespace MyUpdatedBot.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251224042102_AddNewEntityAndDropColumn")]
+    partial class AddNewEntityAndDropColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,39 +133,6 @@ namespace MyUpdatedBot.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("MyUpdatedBot.Core.Models.Entities.WarningRecord", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("ChatId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<long>("UserRefId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("WarningsCount")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserRefId", "ChatId")
-                        .IsUnique();
-
-                    b.ToTable("WarningRecords");
-                });
-
             modelBuilder.Entity("MyUpdatedBot.Core.Models.Entities.MessageCountEntity", b =>
                 {
                     b.HasOne("MyUpdatedBot.Core.Models.Entities.UserEntity", "User")
@@ -178,17 +148,6 @@ namespace MyUpdatedBot.Migrations
                 {
                     b.HasOne("MyUpdatedBot.Core.Models.Entities.UserEntity", "User")
                         .WithMany("RatingStats")
-                        .HasForeignKey("UserRefId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("MyUpdatedBot.Core.Models.Entities.WarningRecord", b =>
-                {
-                    b.HasOne("MyUpdatedBot.Core.Models.Entities.UserEntity", "User")
-                        .WithMany()
                         .HasForeignKey("UserRefId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

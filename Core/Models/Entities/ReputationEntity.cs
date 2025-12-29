@@ -7,6 +7,5 @@
         public UserEntity User { get; set; } = null!;
         public long ChatId { get; set; }
         public int Rating { get; set; } // TODO: Rename to Reputation and update DB
-        public DateTime LastGiven { get; set; } = DateTime.UtcNow;
     }
 }
