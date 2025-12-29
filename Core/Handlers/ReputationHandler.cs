@@ -73,7 +73,7 @@ namespace MyUpdatedBot.Core.Handlers
                 ct);
 
             if (given)
-                await botClient.SendMessage(message.Chat.Id, $"[{message.ReplyToMessage.From.FirstName}](tg://user?id={message.From.Id}) ты получил(а) +1 рейтинг", parseMode: ParseMode.Markdown, cancellationToken: ct);
+                await botClient.SendMessage(message.Chat.Id, $"[{message.ReplyToMessage.From.FirstName}](tg://user?id={message.ReplyToMessage.From.Id}) ты получил(а) +1 рейтинг", parseMode: ParseMode.Markdown, cancellationToken: ct);
         }
     }
 }
