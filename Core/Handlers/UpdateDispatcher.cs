@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -34,23 +35,26 @@ namespace MyUpdatedBot.Core.Handlers
                     {
                         if (!messHandler.CanHandle(msg)) continue;
 
-                        _logger.LogInformation("[UpdateDispatcher]: Update {UpdateId}: handler {Handler} will process message \"{message}\". User: {FristName} - {UserId}",
+                        _logger.LogDebug("[UpdateDispatcher]: Update {UpdateId}: handler {Handler} will process message \"{message}\". User: {FristName} - {UserId}",
                             update.Id,
                             messHandler.GetType().Name,
                             msg.Type,
                             update.Message?.From?.FirstName,
                             update.Message?.From?.Id);
 
+                        var sw = Stopwatch.StartNew();
                         await messHandler.HandleAsync(client, msg, ct);
+                        sw.Stop();
 
-                        _logger.LogInformation("[UpdateDispatcher]: Update {UpdateId}: handler {Handler} completed successfully",
+                        _logger.LogInformation("[UpdateDispatcher]: Update {UpdateId}: handler {Handler} completed successfully in {ElapsedMs}ms",
                                 update.Id,
-                                messHandler.GetType().Name);
+                                messHandler.GetType().Name,
+                                sw.ElapsedMilliseconds);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "[UpdateDispatcher]: message-handler {Handler} threw for update {UpdateId}",
-                            messHandler.GetType().Name, update.Id);
+                        _logger.LogError(ex, "[UpdateDispatcher]: message-handler {Handler} threw for {MessageType}",
+                            messHandler.GetType().Name, update.Type);
                     }
                 }
 
@@ -62,13 +66,6 @@ namespace MyUpdatedBot.Core.Handlers
                         if (!handler.CanHandle(text))
                             continue;
 
-                        _logger.LogInformation("[UpdateDispatcher]: Update {UpdateId}: handler {Handler} will process text \"{Text}\". User: {FristName} - {UserId}",
-                            update.Id,
-                            handler.GetType().Name,
-                            text,
-                            update.Message?.From?.FirstName,
-                            update.Message?.From?.Id);
-
                         try
                         {
                             _logger.LogDebug("[UpdateDispatcher]: User: {FirstName} sent message: {Text}. UserId: {UserId}, UpdateId: {UpdateId}",
@@ -77,17 +74,25 @@ namespace MyUpdatedBot.Core.Handlers
                                     update.Message?.From?.Id,
                                     update.Id);
 
+                            var sw = Stopwatch.StartNew();
                             await handler.HandleAsync(client, msg, ct);
+                            sw.Stop();
 
-                            _logger.LogInformation("[UpdateDispatcher]: Update {UpdateId}: handler {Handler} completed successfully",
+                            _logger.LogInformation("[UpdateDispatcher]: Update {UpdateId}: handler {Handler} completed successfully in {ElapsedMs}ms",
                                 update.Id,
-                                handler.GetType().Name);
+                                handler.GetType().Name,
+                                sw.ElapsedMilliseconds);
                         }
                         catch (Exception ex)
                         {
                             _logger.LogError(ex, "[UpdateDispatcher]: Update {UpdateId}: handler {Handler} threw exception",
                                 update.Id,
                                 handler.GetType().Name);
+                            _logger.LogError("[UpdateDispatcher]: User: {FirstName} sent message: {Text}. UserId: {UserId}, UpdateId: {UpdateId}",
+                                    update.Message?.From?.FirstName,
+                                    update.Message?.Text,
+                                    update.Message?.From?.Id,
+                                    update.Id);
                         }
                     }
                 }
@@ -102,19 +107,22 @@ namespace MyUpdatedBot.Core.Handlers
                     if (!handler.CanHandle(callback))
                         continue;
 
-                    _logger.LogInformation("[UpdateDispatcher]: Update {UpdateId}: button-handler {Handler} will process data=\"{Data}\"",
-                        update.Id, handler.GetType().Name, data);
-
                     try
                     {
+                        _logger.LogDebug("[UpdateDispatcher]: Update {UpdateId}: button-handler {Handler} will process data=\"{Data}\"",
+                        update.Id, handler.GetType().Name, data);
+
+                        var sw = Stopwatch.StartNew();
                         await handler.HandleAsync(client, callback, ct);
-                        _logger.LogInformation("[UpdateDispatcher]: button-handler {Handler} completed successfully for update {UpdateId}",
-                            handler.GetType().Name, update.Id);
+                        sw.Stop();
+
+                        _logger.LogInformation("[UpdateDispatcher]: button-handler {Handler} completed successfully for data {Data} in {ElapsedMs}ms",
+                            handler.GetType().Name, data, sw.ElapsedMilliseconds);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex,"[UpdateDispatcher]: button-handler {Handler} threw exception for update {UpdateId}",
-                            handler.GetType().Name, update.Id);
+                        _logger.LogError(ex,"[UpdateDispatcher]: button-handler {Handler} threw exception for data {Data}",
+                            handler.GetType().Name, data);
                     }
                 }
             }
