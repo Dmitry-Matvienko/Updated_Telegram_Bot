@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace MyUpdatedBot.Core.Handlers
 {
@@ -17,13 +18,15 @@ namespace MyUpdatedBot.Core.Handlers
     {
         private readonly IBroadcastService _bcast;
         private readonly IUserStatsService _stats;
+        private readonly IShowMemoryInfo _memoryInfo;
         private readonly IReadOnlyCollection<long> _admins;
 
-        public OwnerCommandHandler(IBroadcastService bcast,IUserStatsService stats, IOptions<OwnerSettings> admins)
+        public OwnerCommandHandler(IBroadcastService bcast,IUserStatsService stats, IOptions<OwnerSettings> admins, IShowMemoryInfo memoryInfo)
         {
             _bcast = bcast;
             _stats = stats;
             _admins = admins.Value.Ids;
+            _memoryInfo = memoryInfo;
         }
 
         public bool CanHandle(string text) => text.StartsWith("/admin", StringComparison.OrdinalIgnoreCase);
@@ -39,7 +42,8 @@ namespace MyUpdatedBot.Core.Handlers
                 await botClient.SendMessage(message.Chat.Id,
                     "Доступные команды:\n" +
                     "/admin userscount - количество пользователй\n" +
-                    "/admin broadcast [Текст] - рассылка всем пользователям\n",
+                    "/admin broadcast [Текст] - рассылка всем пользователям\n" +
+                    "/admin memory - отчет о состоянии бота",
                     cancellationToken: ct);
                 return;
             }
@@ -55,6 +59,12 @@ namespace MyUpdatedBot.Core.Handlers
                 var text = cmd.Substring("broadcast ".Length);
                 await _bcast.BroadcastAsync(text, ct);
                 await botClient.SendMessage(message.Chat.Id, "Рассылка отправлена.", cancellationToken: ct);
+            }
+            else if (cmd.StartsWith("memory", StringComparison.OrdinalIgnoreCase))
+            {
+                var report = await _memoryInfo.ShowInfoAsync(ct);
+
+                await botClient.SendMessage(chatId: message.Chat.Id, text: report, parseMode: ParseMode.Markdown, cancellationToken: ct);
             }
             else
             {
