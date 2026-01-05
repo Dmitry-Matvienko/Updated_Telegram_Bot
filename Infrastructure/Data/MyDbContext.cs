@@ -8,6 +8,8 @@ namespace MyUpdatedBot.Infrastructure.Data
         public DbSet<UserEntity> Users { get; set; } = default!;
         public DbSet<MessageCountEntity> MessageStats { get; set; } = default!;
         public DbSet<ReputationEntity> RatingStats { get; set; } = default!; // TODO: Rename to  ReputationStats and update DB
+        public DbSet<ReputationGivenEntity> ReputationGivens { get; set; } = default!;
+        public DbSet<WarningRecord> WarningRecords { get; set; } = default!;
 
         public MyDbContext(DbContextOptions<MyDbContext> opts) : base(opts) { }
 
@@ -36,6 +38,22 @@ namespace MyUpdatedBot.Infrastructure.Data
               .HasOne(l => l.User)
               .WithMany(u => u.RatingStats)
               .HasForeignKey(l => l.UserRefId);
+            modelBuilder.Entity<ReputationGivenEntity>()
+              .HasIndex(g => new { g.FromUserId, g.ToUserRefId, g.ChatId })
+              .IsUnique();
+
+            modelBuilder.Entity<WarningRecord>(b =>
+            {
+                b.HasKey(w => w.Id);
+                b.HasIndex(w => new { w.UserRefId, w.ChatId }).IsUnique();
+                b.Property(w => w.CreatedAtUtc).IsRequired();
+                b.Property(w => w.WarningsCount).HasDefaultValue(0);
+                b.Property(w => w.RowVersion).IsRowVersion();
+                b.HasOne(w => w.User)
+                 .WithMany()
+                 .HasForeignKey(w => w.UserRefId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }
