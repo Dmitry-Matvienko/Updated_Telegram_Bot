@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyUpdatedBot.Cache;
 using MyUpdatedBot.Core.Handlers;
@@ -17,11 +16,11 @@ using MyUpdatedBot.Services.CrocodileGame;
 using MyUpdatedBot.Services.MessageStats;
 using MyUpdatedBot.Services.OwnerTools;
 using MyUpdatedBot.Services.RollGame;
+using MyUpdatedBot.Services.SpamProtection;
 using MyUpdatedBot.Services.UserLeaderboard;
 using MyUpdatedBot.Services.UserReputation;
 using Serilog;
 using Telegram.Bot;
-using Microsoft.EntityFrameworkCore.SqlServer.Diagnostics;
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -81,29 +80,38 @@ try
             services.AddHostedService<BotHostedService>();
 
             // Cleanup hosted service
-            //services.AddHostedService<CleanupHostedService>();
+            services.AddHostedService<CleanupHostedService>();
+            services.AddSingleton<IPeriodicCleanup, WarningCleanup>();
 
             //Cache
             services.AddMemoryCache();
             services.AddSingleton<IThrottleStore, MemoryThrottleStore>();
             services.AddSingleton<IProcessedStore, ReportsProcessedStore>();
+            services.AddSingleton<ISpamStore, SpamStore>();
 
             // Other scoped-services
             services.AddScoped<IReputationService, ReputationService>();
             services.AddScoped<IUserLeaderboardService, UserLeaderboardService>();
             services.AddScoped<IBroadcastService, BroadcastService>();
             services.AddScoped<IUserStatsService, UserStatsService>();
+            services.AddScoped<IWarning, WarningService>();
+
+            // Other singleton-services
+            services.AddSingleton<IShowMemoryInfo, ShowMemoryInfo>();
 
             // Core handlers
             services.AddTransient<IUpdateHandlerService, UpdateDispatcher>();
 
+            // Message handlers
+            services.AddTransient<IMessageHandler, CountMessageHandler>();
+            services.AddTransient<IMessageHandler, SpamMessageHandler>();
+            services.AddTransient<IMessageHandler, CrocodileGuessHandler>();
+
             // Command handlers
-            services.AddTransient<ICommandHandler, CountTextMessageHandler>();
             services.AddTransient<ICommandHandler, TopMessageCountHandler>();
             services.AddTransient<ICommandHandler, ReputationHandler>();
             services.AddTransient<ICommandHandler, OptionalHandler>();
             services.AddTransient<ICommandHandler, CrocodileHandler>();
-            services.AddTransient<ICommandHandler, CrocodileGuessHandler>();
             services.AddTransient<ICommandHandler, OwnerCommandHandler>();
             services.AddTransient<ICommandHandler, RollGameHandler>();
             services.AddTransient<ICommandHandler, UserReportHandler>();
