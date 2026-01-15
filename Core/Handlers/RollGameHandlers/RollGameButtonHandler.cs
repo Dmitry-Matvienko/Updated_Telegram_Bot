@@ -82,19 +82,50 @@ namespace MyUpdatedBot.Core.Handlers.RollGameHandlers
         private string BuildLeaderBoardText(RollGameState state, bool finished)
         {
             var sb = new StringBuilder();
-            if (!state.Results.Any()) sb.AppendLine("_Пока нет участников_");
+
+            if (!state.Results.Any())
+            {
+                sb.AppendLine("_Пока нет участников_");
+            }
             else
             {
-                var top = state.Results.Values.OrderByDescending(r => r.Value).Take(10).Select((r, i) => $"{i + 1}. [{r.FirstName}](tg://user?id={r.UserId}) — *{r.Value}*");
+                var ordered = state.Results.Values
+                    .OrderByDescending(r => r.Value)
+                    .ThenBy(r => r.FirstName)
+                    .ToList();
+
                 sb.AppendLine("Победители:");
-                foreach (var s in top) sb.AppendLine(s);
+
+                var medals = new[] { "🥇", "🥈", "🥉" };
+
+                int rank = 1;
+
+                for (int i = 0; i < Math.Min(3, ordered.Count); i++, rank++)
+                {
+                    var r = ordered[i];
+                    var medal = medals[i];
+                    sb.AppendLine($"{medal} [{r.FirstName}](tg://user?id={r.UserId}) — *{r.Value}*");
+                }
+
+                var rest = ordered.Skip(3).Take(7).ToList();
+                if (rest.Any())
+                {
+                    sb.AppendLine("\nОстальные участники:");
+                    foreach (var r in rest)
+                    {
+                        sb.AppendLine($"{rank}. [{r.FirstName}](tg://user?id={r.UserId}) — *{r.Value}*");
+                        rank++;
+                    }
+                }
             }
+
             sb.AppendLine();
 
             var remaining = (int) (state.EndsAt - DateTime.UtcNow).TotalSeconds;
             if (remaining < 0) remaining = 0;
             var timeStr = TimeSpan.FromSeconds(remaining).ToString(@"mm\:ss");
             sb.AppendLine(finished ? "Розыгрыш окончен!" : $"До конца: {timeStr}");
+
             return sb.ToString();
         }
     }
