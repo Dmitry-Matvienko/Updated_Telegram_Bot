@@ -23,8 +23,8 @@ namespace MyUpdatedBot.Core.Handlers.RollGameHandlers
 
             var kb = new InlineKeyboardMarkup(new[]
             {
-                InlineKeyboardButton.WithCallbackData("Ролл 🎲", $"roll:{eventId:N}"),
-                InlineKeyboardButton.WithCallbackData("Остановить розыгрыш ⛔️", $"stop:{eventId:N}")
+                new [] {InlineKeyboardButton.WithCallbackData("Ролл 🎲", $"roll:{eventId:N}") },
+                new [] {InlineKeyboardButton.WithCallbackData("Остановить ⛔️", $"stop:{eventId:N}") }
             });
 
             var text = $"🎲 Розыгрыш начат! Инициатор: [{message.From.FirstName}](tg://user?id={message.From.Id})\n\n" +
