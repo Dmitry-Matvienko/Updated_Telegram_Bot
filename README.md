@@ -11,19 +11,22 @@
 - **Local(in a group) and global top-10** by messages and raputation
 - Flexible **architecture**
 - Logging via **Serilog** (configuration via `appsettings.json` + reloadOnChange)
-- **Tools for owner** for user statistics and sending messages in every chat
+- **Tools for owner** for user statistics, bot memory/process information, etc
 - Popular **Crocodile game** for groups. List of words are in  `crocodile-words.txt`
 - **RollGame** is a quick game `roll the dice` (value 1–100). The result is recorded and displayed in the leaderboard.
-- **User reports** — users can send complaints to admins using the commands `!админ` or `!report`. The admin receives the complaint and processes it
+- **User reports** — users can send complaints to admins using the commands `!админ` or `!report`
+- **Complaint handling** - admins receives the complaint and processes it(ignore/mute/ban)
+- **Spam detection** protects the chat/group from attacks
 
 ## Project structure
 
 ```
+/ Cache			# internal storage for in-memory operations
 / Core          # basic models, interfaces, handlers
-  / Handlers    # ICommandHandler for bot commands
+  / Handlers    # Handlers and interfaces to them for bot commands
   / Models      # EF Core entities and DTOs
 / Infrastructure # hosting, BotHostedService, Data (MyDbContext)
-/ Services      # different services, including background services (MessageStatsService, RatingService)
+/ Services      # different services for processing commands, including background services
 Program.cs      # Main point, host configuration
 appsettings.json# project configuration
 
@@ -103,10 +106,11 @@ Migrations/     # EF Core migrations
 - **BotHostedService**: starts polling and delegates updates to `UpdateDispatcher` via DI-scoped `IUpdateHandlerService`.
 - **UpdateDispatcher**: iterates through all `ICommandHandler`s, calls `CanHandle` + `HandleAsync`.
 - **MessageCountStatsService**: background service with `Channel<>`, batching `MessageCountEntity`.
-- Using **IMemoryCache** to store temporary data with its own `TTL`
+- Using **IMemoryCache**: to store temporary data with its own `TTL`
 - **UserLeaderboard**: service responsible for generating local and global top-10 lists based on messages and ratings
 - **EF Core**: `MyDbContext` with `DbSet<UserEntity>`, `MessageStats`, `RatingStats`.
 - **Serilog**: configured via `appsettings.json` + `UseSerilog(...).ReadFrom.Configuration(..., reloadOnChange:true)`.
+- **Clenup**: a background custom timer that periodically runs registered cleanup tasks
 
 ## Logging
 
