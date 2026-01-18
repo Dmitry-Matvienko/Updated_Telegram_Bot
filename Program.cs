@@ -106,6 +106,7 @@ try
             services.AddTransient<IMessageHandler, CountMessageHandler>();
             services.AddTransient<IMessageHandler, SpamMessageHandler>();
             services.AddTransient<IMessageHandler, CrocodileGuessHandler>();
+            services.AddTransient<IMessageHandler, LinkDetectionHandler>();
 
             // Command handlers
             services.AddTransient<ICommandHandler, TopMessageCountHandler>();
