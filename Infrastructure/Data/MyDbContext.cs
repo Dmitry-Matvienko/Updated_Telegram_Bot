@@ -10,6 +10,7 @@ namespace MyUpdatedBot.Infrastructure.Data
         public DbSet<ReputationEntity> RatingStats { get; set; } = default!; // TODO: Rename to  ReputationStats and update DB
         public DbSet<ReputationGivenEntity> ReputationGivens { get; set; } = default!;
         public DbSet<WarningRecord> WarningRecords { get; set; } = default!;
+        public DbSet<ChatSettingsEntity> ChatSettings { get; set; } = default!;
 
         public MyDbContext(DbContextOptions<MyDbContext> opts) : base(opts) { }
 
@@ -53,6 +54,14 @@ namespace MyUpdatedBot.Infrastructure.Data
                  .WithMany()
                  .HasForeignKey(w => w.UserRefId)
                  .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ChatSettingsEntity>(b =>
+            {
+                b.HasKey(c => c.Id);
+                b.HasIndex(c => c.ChatId).IsUnique();
+                b.Property(c => c.SpamProtectionEnabled).IsRequired();
+                b.Property(c => c.LinksAllowed).IsRequired();
             });
         }
     }
