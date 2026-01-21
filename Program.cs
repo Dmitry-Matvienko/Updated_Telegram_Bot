@@ -4,13 +4,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using MyUpdatedBot.Cache;
+using MyUpdatedBot.Cache.ChatSettingsStore;
+using MyUpdatedBot.Cache.ReportsStore;
 using MyUpdatedBot.Core.Handlers;
+using MyUpdatedBot.Core.Handlers.ChatSettingsHandlers;
 using MyUpdatedBot.Core.Handlers.CrocodileHandlers;
 using MyUpdatedBot.Core.Handlers.ReportHandlers;
 using MyUpdatedBot.Core.Handlers.RollGameHandlers;
 using MyUpdatedBot.Core.Models;
 using MyUpdatedBot.Infrastructure;
 using MyUpdatedBot.Infrastructure.Data;
+using MyUpdatedBot.Services.ChatSettings;
 using MyUpdatedBot.Services.Cleanup;
 using MyUpdatedBot.Services.CrocodileGame;
 using MyUpdatedBot.Services.MessageStats;
@@ -88,6 +92,7 @@ try
             services.AddSingleton<IThrottleStore, MemoryThrottleStore>();
             services.AddSingleton<IProcessedStore, ReportsProcessedStore>();
             services.AddSingleton<ISpamStore, SpamStore>();
+            services.AddSingleton<IChatSettingsStore, ChatSettingsStore>();
 
             // Other scoped-services
             services.AddScoped<IReputationService, ReputationService>();
@@ -95,6 +100,7 @@ try
             services.AddScoped<IBroadcastService, BroadcastService>();
             services.AddScoped<IUserStatsService, UserStatsService>();
             services.AddScoped<IWarning, WarningService>();
+            services.AddScoped<IChatSettingsService, ChatSettingsService>();
 
             // Other singleton-services
             services.AddSingleton<IShowMemoryInfo, ShowMemoryInfo>();
@@ -116,11 +122,13 @@ try
             services.AddTransient<ICommandHandler, OwnerCommandHandler>();
             services.AddTransient<ICommandHandler, RollGameHandler>();
             services.AddTransient<ICommandHandler, UserReportHandler>();
+            services.AddTransient<ICommandHandler, ChatSettingsHandler>();
 
             // Button handlers
             services.AddTransient<IButtonHandlers, CrocodileButtonHandler>();
             services.AddTransient<IButtonHandlers, RollGameButtonHandler>();
             services.AddTransient<IButtonHandlers, AdminReportCallbackHandler>();
+            services.AddTransient<IButtonHandlers, SettingsCallbackHandler>();
 
         })
         .Build()
