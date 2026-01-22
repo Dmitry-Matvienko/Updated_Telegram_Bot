@@ -16,7 +16,9 @@
 - **RollGame** is a quick game `roll the dice` (value 1–100). The result is recorded and displayed in the leaderboard.
 - **User reports** — users can send complaints to admins using the commands `!админ` or `!report`
 - **Complaint handling** - admins receives the complaint and processes it(ignore/mute/ban)
-- **Spam detection** protects the chat/group from attacks
+- **Flood detection** protects the chat/group from attacks
+- **Link detection** searching for and removing links in messages
+- **Chat settings** allow to switch settings for each chat
 
 ## Project structure
 
@@ -99,6 +101,7 @@ Migrations/     # EF Core migrations
 - `/CrocodileGame` — the game “crocodile” where users have to guess the word
 - `/StartRoll` — a “roll the dice” game with values from 1 to 100 and a leaderboard
 - **Reply to user** «!админ» or «!report» to send a complaint to the admins
+- `/Settings` - show current chat settings
 
 ## Architecture
 
