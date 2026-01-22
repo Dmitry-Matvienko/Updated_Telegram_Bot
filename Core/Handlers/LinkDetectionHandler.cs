@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using MyUpdatedBot.Cache.ChatSettingsStore;
+using MyUpdatedBot.Services.ChatSettings;
 using MyUpdatedBot.Services.SpamProtection;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -10,20 +12,28 @@ namespace MyUpdatedBot.Core.Handlers
     {
         private readonly IWarning _warning;
         private readonly ILogger<LinkDetectionHandler> _logger;
+        private readonly IChatSettingsService _settingsService;
+        private readonly IChatSettingsStore _settingsCache;
 
         private const int MaxWarnings = 3;
         private static readonly TimeSpan MuteDuration = TimeSpan.FromHours(24);
 
-        public LinkDetectionHandler(IWarning warning, ILogger<LinkDetectionHandler> logger)
+        public LinkDetectionHandler(IWarning warning, ILogger<LinkDetectionHandler> logger,
+                                    IChatSettingsService settingsService, IChatSettingsStore settingsCache)
         {
             _warning = warning;
             _logger = logger;
+            _settingsService = settingsService;
+            _settingsCache = settingsCache;
         }
 
         public bool CanHandle(Message? message)
         {
             if (message?.From == null || message.Chat == null || message.From.IsBot) return false;
             if (string.IsNullOrWhiteSpace(message.Text ?? message.Caption)) return false;
+
+            // if cached and LinksAllowed
+            if (_settingsCache.TryGet(message.Chat.Id, out var cached) && cached != null && cached.LinksAllowed == true) return false;
 
             var entities = message.Entities ?? message.CaptionEntities;
             if (entities != null && entities.Any(e =>
@@ -39,9 +49,15 @@ namespace MyUpdatedBot.Core.Handlers
 
         public async Task HandleAsync(ITelegramBotClient botClient, Message message, CancellationToken ct)
         {
+            var settings = await _settingsService.GetOrCreateAsync(message.Chat.Id, ct);
+            _settingsCache.Set(message.Chat.Id, settings);
+
+            if (settings.LinksAllowed) return;
+
+
             if (TryGetLinkFromEntities(message, out var matched))
             {
-                await ProcessFoundLink(botClient, message, matched, ct).ConfigureAwait(false);
+                await ProcessFoundLink(botClient, message, matched, ct);
                 return;
             }
         }
