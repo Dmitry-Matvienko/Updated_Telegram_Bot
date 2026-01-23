@@ -1,5 +1,4 @@
-﻿
-namespace MyUpdatedBot.Cache
+﻿namespace MyUpdatedBot.Cache.ReportsStore
 {
     public record ProcessedInfo(string Action, long AdminId, string AdminName, DateTime When);
     public interface IProcessedStore

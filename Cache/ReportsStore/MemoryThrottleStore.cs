@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
-namespace MyUpdatedBot.Cache
+namespace MyUpdatedBot.Cache.ReportsStore
 {
     public class MemoryThrottleStore : IThrottleStore
     {

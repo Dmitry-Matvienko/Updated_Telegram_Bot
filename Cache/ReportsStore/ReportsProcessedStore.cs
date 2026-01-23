@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Serilog;
 using System.Collections.Concurrent;
 
 namespace MyUpdatedBot.Cache.ReportsStore

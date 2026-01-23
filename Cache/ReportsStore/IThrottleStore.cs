@@ -1,5 +1,5 @@
 ﻿
-namespace MyUpdatedBot.Cache
+namespace MyUpdatedBot.Cache.ReportsStore
 {
     public interface IThrottleStore
     {
