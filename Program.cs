@@ -89,8 +89,8 @@ try
 
             //Cache
             services.AddMemoryCache();
-            services.AddSingleton<IThrottleStore, MemoryThrottleStore>();
-            services.AddSingleton<IProcessedStore, ReportsProcessedStore>();
+            services.AddSingleton<IUserReportsThrottleStore, UserReportsThrottleStore>();
+            services.AddSingleton<IReportsProcessedStore, ReportsProcessedStore>();
             services.AddSingleton<ISpamStore, SpamStore>();
             services.AddSingleton<IChatSettingsStore, ChatSettingsStore>();
 

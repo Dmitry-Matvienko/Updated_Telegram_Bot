@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 
 namespace MyUpdatedBot.Cache.ReportsStore
 {
-    public class ReportsProcessedStore : IProcessedStore, IDisposable
+    public class ReportsProcessedStore : IReportsProcessedStore, IDisposable
     {
         private readonly ConcurrentDictionary<(long, int, long), ProcessedInfo> _dict = new();
         private readonly IMemoryCache _cache;

@@ -3,14 +3,14 @@ using Microsoft.Extensions.Logging;
 
 namespace MyUpdatedBot.Cache.ReportsStore
 {
-    public class MemoryThrottleStore : IThrottleStore
+    public class UserReportsThrottleStore : IUserReportsThrottleStore
     {
         private readonly IMemoryCache _cache;
-        private readonly ILogger<MemoryThrottleStore> _logger;
+        private readonly ILogger<UserReportsThrottleStore> _logger;
 
         private readonly TimeSpan _throttleDelay;
 
-        public MemoryThrottleStore(IMemoryCache cache, ILogger<MemoryThrottleStore> logger, TimeSpan? throttleDelay = null)
+        public UserReportsThrottleStore(IMemoryCache cache, ILogger<UserReportsThrottleStore> logger, TimeSpan? throttleDelay = null)
         {
             _cache = cache;
             _logger = logger;

@@ -9,9 +9,9 @@ using MyUpdatedBot.Cache.ReportsStore;
 public class UserReportHandler : IMessageHandler
 {
     private readonly ILogger<UserReportHandler> _logger;
-    private readonly IThrottleStore _throttle;
+    private readonly IUserReportsThrottleStore _throttle;
 
-    public UserReportHandler(ILogger<UserReportHandler> logger, IThrottleStore throttle)
+    public UserReportHandler(ILogger<UserReportHandler> logger, IUserReportsThrottleStore throttle)
     {
         _logger = logger;
         _throttle = throttle;
@@ -79,21 +79,18 @@ public class UserReportHandler : IMessageHandler
             return;
         }
 
-        InlineKeyboardMarkup BuildButtons() =>
-            new InlineKeyboardMarkup(new[]
+        var buttons = new InlineKeyboardMarkup(new[]
+        {
+            new []
             {
-                new []
-                {
-                    InlineKeyboardButton.WithCallbackData("🔇 Мут 30 мин", $"compl:{chatId}:{message.ReplyToMessage.MessageId}:{target.Id}:mute30"),
-                    InlineKeyboardButton.WithCallbackData("⛔ Бан", $"compl:{chatId}:{message.ReplyToMessage.MessageId}:{target.Id}:ban")
-                },
-                new []
-                {
-                    InlineKeyboardButton.WithCallbackData("➖ Игнор", $"compl:{chatId}:{message.ReplyToMessage.MessageId}:{target.Id}:ignore")
-                }
-            });
-
-        var buttons = BuildButtons();
+                InlineKeyboardButton.WithCallbackData("🔇 Мут 30 мин", $"compl:{chatId}:{message.ReplyToMessage.MessageId}:{target.Id}:mute30"),
+                InlineKeyboardButton.WithCallbackData("⛔ Бан", $"compl:{chatId}:{message.ReplyToMessage.MessageId}:{target.Id}:ban")
+            },
+            new []
+            {
+                InlineKeyboardButton.WithCallbackData("➖ Игнор", $"compl:{chatId}:{message.ReplyToMessage.MessageId}:{target.Id}:ignore")
+            }
+        });
 
         var notifyText = $"⚠️ Жалоба в чате {(message.Chat.Title ?? message.Chat.Id.ToString())}\n" +
                          $"Жалоба от: [{(message.From.FirstName ?? message.From.Username ?? message.From.Id.ToString())}](tg://user?id={reporterId})\n" +

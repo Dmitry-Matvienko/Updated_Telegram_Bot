@@ -1,7 +1,7 @@
 ﻿
 namespace MyUpdatedBot.Cache.ReportsStore
 {
-    public interface IThrottleStore
+    public interface IUserReportsThrottleStore
     {
         bool TryCheckAndSet((long chat, long user) key, out int waitSeconds);
     }

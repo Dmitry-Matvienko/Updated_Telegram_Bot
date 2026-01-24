@@ -9,9 +9,9 @@ namespace MyUpdatedBot.Core.Handlers.ReportHandlers
     public class AdminReportCallbackHandler : IButtonHandlers
     {
         private readonly ILogger<AdminReportCallbackHandler > _logger;
-        private readonly IProcessedStore _processedStore;
+        private readonly IReportsProcessedStore _processedStore;
 
-        public AdminReportCallbackHandler (ILogger<AdminReportCallbackHandler > logger, IProcessedStore processedStore)
+        public AdminReportCallbackHandler (ILogger<AdminReportCallbackHandler > logger, IReportsProcessedStore processedStore)
         {
             _logger = logger;
             _processedStore = processedStore;
