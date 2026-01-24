@@ -21,14 +21,14 @@ namespace MyUpdatedBot.Cache.ReportsStore
         {
             var cacheKey = GetKey(key);
 
-            _logger.LogDebug("[MemoryThrottleStore]: TryCheckAndSet start for {CacheKey} ttl={Ttl}s", cacheKey, _throttleDelay.TotalSeconds);
+            _logger.LogDebug("[UserReportsThrottleStore]: TryCheckAndSet start for {CacheKey} ttl={Ttl}s", cacheKey, _throttleDelay.TotalSeconds);
 
             if (_cache.TryGetValue(cacheKey, out long expiryTicks))
             {
                 var remaining = new DateTime(expiryTicks, DateTimeKind.Utc) - DateTime.UtcNow;
                 waitSeconds = remaining.TotalSeconds > 0 ? (int) Math.Ceiling(remaining.TotalSeconds) : 0;
 
-                _logger.LogInformation("[MemoryThrottleStore]: HIT {CacheKey} remaining={Seconds}s", cacheKey, waitSeconds);
+                _logger.LogDebug("[UserReportsThrottleStore]: HIT {CacheKey} remaining={Seconds}s", cacheKey, waitSeconds);
 
                 return false;
             }
