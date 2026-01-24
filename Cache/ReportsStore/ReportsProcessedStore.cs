@@ -10,11 +10,13 @@ namespace MyUpdatedBot.Cache.ReportsStore
         private readonly IMemoryCache _cache;
         private readonly ILogger<ReportsProcessedStore> _logger;
         private volatile bool _disposed;
+        private readonly TimeSpan _processedRetention;
 
-        public ReportsProcessedStore(IMemoryCache cache, ILogger<ReportsProcessedStore> logger)
+        public ReportsProcessedStore(IMemoryCache cache, ILogger<ReportsProcessedStore> logger, TimeSpan? retention = null)
         {
             _cache = cache;
             _logger = logger;
+            _processedRetention = retention ?? TimeSpan.FromDays(3);
         }
 
         public bool TryGet((long sourceChat, int sourceMessageId, long targetUser) key, out ProcessedInfo info)
@@ -35,13 +37,13 @@ namespace MyUpdatedBot.Cache.ReportsStore
             return found;
         }
 
-        public bool TryAdd((long sourceChat, int sourceMessageId, long targetUser) key, ProcessedInfo info, TimeSpan retention)
+        public bool TryAdd((long sourceChat, int sourceMessageId, long targetUser) key, ProcessedInfo info)
         {
             ThrowIfDisposed();
 
             var tupleKey = (key.sourceChat, key.sourceMessageId, key.targetUser);
 
-            _logger.LogDebug("[ReportsProcessedStore]: TryAdd start for {Key} retention={Retention}", GetKey(tupleKey), retention);
+            _logger.LogDebug("[ReportsProcessedStore]: TryAdd start for {Key} retention={Retention}", GetKey(tupleKey), _processedRetention);
 
             if (!_dict.TryAdd(tupleKey, info))
             {
@@ -52,7 +54,7 @@ namespace MyUpdatedBot.Cache.ReportsStore
             var cacheKey = GetKey(tupleKey);
             var options = new MemoryCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = retention
+                AbsoluteExpirationRelativeToNow = _processedRetention
             };
 
             options.RegisterPostEvictionCallback((k, v, reason, state) =>
@@ -78,7 +80,7 @@ namespace MyUpdatedBot.Cache.ReportsStore
             try
             {
                 _cache.Set(cacheKey, true, options);
-                _logger.LogDebug("[ReportsProcessedStore]: Marked processed {Key} (retention {Retention})", cacheKey, retention);
+                _logger.LogDebug("[ReportsProcessedStore]: Marked processed {Key} (retention {Retention})", cacheKey, _processedRetention);
                 return true;
             }
             catch (Exception ex)

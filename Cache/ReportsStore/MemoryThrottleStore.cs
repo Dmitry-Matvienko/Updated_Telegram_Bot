@@ -8,17 +8,20 @@ namespace MyUpdatedBot.Cache.ReportsStore
         private readonly IMemoryCache _cache;
         private readonly ILogger<MemoryThrottleStore> _logger;
 
-        public MemoryThrottleStore(IMemoryCache cache, ILogger<MemoryThrottleStore> logger)
+        private readonly TimeSpan _throttleDelay;
+
+        public MemoryThrottleStore(IMemoryCache cache, ILogger<MemoryThrottleStore> logger, TimeSpan? throttleDelay = null)
         {
             _cache = cache;
             _logger = logger;
+            _throttleDelay = throttleDelay ?? TimeSpan.FromSeconds(180);
         }
 
-        public bool TryCheckAndSet((long chat, long user) key, TimeSpan throttleDelay, out int waitSeconds)
+        public bool TryCheckAndSet((long chat, long user) key, out int waitSeconds)
         {
             var cacheKey = GetKey(key);
 
-            _logger.LogDebug("[MemoryThrottleStore]: TryCheckAndSet start for {CacheKey} ttl={Ttl}s", cacheKey, throttleDelay.TotalSeconds);
+            _logger.LogDebug("[MemoryThrottleStore]: TryCheckAndSet start for {CacheKey} ttl={Ttl}s", cacheKey, _throttleDelay.TotalSeconds);
 
             if (_cache.TryGetValue(cacheKey, out long expiryTicks))
             {
@@ -30,10 +33,10 @@ namespace MyUpdatedBot.Cache.ReportsStore
                 return false;
             }
 
-            var expiry = DateTime.UtcNow.Add(throttleDelay);
+            var expiry = DateTime.UtcNow.Add(_throttleDelay);
             var options = new MemoryCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = throttleDelay
+                AbsoluteExpirationRelativeToNow = _throttleDelay
             };
 
             _cache.Set(cacheKey, expiry.Ticks, options);

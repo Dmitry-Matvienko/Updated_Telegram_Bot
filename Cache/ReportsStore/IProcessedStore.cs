@@ -4,7 +4,7 @@
     public interface IProcessedStore
     {
         bool TryGet((long sourceChat, int sourceMessageId, long targetUser) key, out ProcessedInfo info);
-        bool TryAdd((long sourceChat, int sourceMessageId, long targetUser) key, ProcessedInfo info, TimeSpan retention);
+        bool TryAdd((long sourceChat, int sourceMessageId, long targetUser) key, ProcessedInfo info);
         bool TryRemove((long sourceChat, int sourceMessageId, long targetUser) key, out ProcessedInfo info);
     }
 }

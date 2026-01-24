@@ -1,12 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Net;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
 using MyUpdatedBot.Cache.ReportsStore;
 
 namespace MyUpdatedBot.Core.Handlers.ReportHandlers
@@ -15,7 +10,6 @@ namespace MyUpdatedBot.Core.Handlers.ReportHandlers
     {
         private readonly ILogger<AdminReportCallbackHandler > _logger;
         private readonly IProcessedStore _processedStore;
-        private static readonly TimeSpan ProcessedRetention = TimeSpan.FromDays(3);
 
         public AdminReportCallbackHandler (ILogger<AdminReportCallbackHandler > logger, IProcessedStore processedStore)
         {
@@ -49,8 +43,8 @@ namespace MyUpdatedBot.Core.Handlers.ReportHandlers
             try
             {
                 var member = await botClient.GetChatMember(sourceChatId, callback.From.Id, ct);
-                var isAdmin = member.Status == Telegram.Bot.Types.Enums.ChatMemberStatus.Administrator
-                           || member.Status == Telegram.Bot.Types.Enums.ChatMemberStatus.Creator;
+                var isAdmin = member.Status == ChatMemberStatus.Administrator
+                           || member.Status == ChatMemberStatus.Creator;
                 if (!isAdmin)
                 {
                     await botClient.AnswerCallbackQuery(callback.Id, "Вы не администратор этого чата.", showAlert: true, cancellationToken: ct);
@@ -80,7 +74,7 @@ namespace MyUpdatedBot.Core.Handlers.ReportHandlers
             var adminName = callback.From.FirstName ?? callback.From.Username ?? callback.From.Id.ToString();
             var info = new ProcessedInfo(action, callback.From.Id, adminName, DateTime.UtcNow);
 
-            if (!_processedStore.TryAdd(complaintKey, info, ProcessedRetention))
+            if (!_processedStore.TryAdd(complaintKey, info))
             {
                 _processedStore.TryGet(complaintKey, out var info2);
                 await botClient.AnswerCallbackQuery(callback.Id,

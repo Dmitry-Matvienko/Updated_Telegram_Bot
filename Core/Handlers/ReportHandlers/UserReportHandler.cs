@@ -12,7 +12,6 @@ public class UserReportHandler : ICommandHandler
     private readonly IThrottleStore _throttle;
 
     // delay between complaints from one user in one chat
-    private readonly TimeSpan _throttleDelay = TimeSpan.FromSeconds(180);
 
     public UserReportHandler(ILogger<UserReportHandler> logger, IThrottleStore throttle)
     {
@@ -55,7 +54,7 @@ public class UserReportHandler : ICommandHandler
 
         // throttle
         var key = (chat: chatId, user: reporterId);
-        if (!_throttle.TryCheckAndSet(key, _throttleDelay, out var waitSeconds))
+        if (!_throttle.TryCheckAndSet(key, out var waitSeconds))
         {
             await botClient.SendMessage(chatId,
                 $"Подожди {waitSeconds} сек. прежде чем отправлять следующую жалобу",
