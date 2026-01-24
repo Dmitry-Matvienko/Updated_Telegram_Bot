@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using MyUpdatedBot.Cache;
 using MyUpdatedBot.Cache.ChatSettingsStore;
+using MyUpdatedBot.Cache.SpamStore;
 using MyUpdatedBot.Services.ChatSettings;
 using MyUpdatedBot.Services.SpamProtection;
 using Telegram.Bot;
@@ -11,7 +11,7 @@ namespace MyUpdatedBot.Core.Handlers
 {
     public class SpamMessageHandler : IMessageHandler
     {
-        private readonly ISpamStore _spamStore;
+        private readonly IFloodStore _spamStore;
         private readonly IWarning _warning;
         private readonly ILogger<SpamMessageHandler> _logger;
         private readonly IChatSettingsService _settingsService;
@@ -21,7 +21,7 @@ namespace MyUpdatedBot.Core.Handlers
         private static readonly TimeSpan MuteDuration = TimeSpan.FromHours(24);
 
         public SpamMessageHandler(
-            ISpamStore spamStore,
+            IFloodStore spamStore,
             IWarning warning,
             ILogger<SpamMessageHandler> logger,
             IChatSettingsService settingsService,
@@ -37,7 +37,7 @@ namespace MyUpdatedBot.Core.Handlers
         public bool CanHandle(Message? message)
         {
             if (message?.From == null || message.Chat == null || message.From.IsBot) return false;
-
+            if (message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup) return false;
             if (_settingsCache.TryGet(message.Chat.Id, out var cached) && cached != null && cached.SpamProtectionEnabled == false) return false;
 
             return true;
@@ -45,24 +45,22 @@ namespace MyUpdatedBot.Core.Handlers
 
         public async Task HandleAsync(ITelegramBotClient botClient, Message message, CancellationToken ct)
         {
-            if (message.From is null) return;
-
             var chatId = message.Chat.Id;
             var userId = message.From.Id;
 
-            var settings = await _settingsService.GetOrCreateAsync(message.Chat.Id, ct);
-            _settingsCache.Set(message.Chat.Id, settings);
+            var settings = await _settingsService.GetOrCreateAsync(chatId, ct);
+            _settingsCache.Set(chatId, settings);
 
             if (!settings.SpamProtectionEnabled) return;
 
             // quick in-memory detector
-            var isSpam = await _spamStore.AddAndCheckAsync(chatId, userId, ct).ConfigureAwait(false);
+            var isSpam = await _spamStore.AddAndCheckAsync(chatId, userId, ct);
             if (!isSpam) return;
 
             int warnings;
             try
             {
-                warnings = await _warning.AddWarningAsync(chatId, userId, ct).ConfigureAwait(false);
+                warnings = await _warning.AddWarningAsync(chatId, userId, ct);
             }
             catch (Exception ex)
             {
@@ -77,10 +75,10 @@ namespace MyUpdatedBot.Core.Handlers
             {
                 if (warnings >= MaxWarnings)
                 {
-                    var member = await botClient.GetChatMember(chatId, userId, ct).ConfigureAwait(false);
+                    var member = await botClient.GetChatMember(chatId, userId, ct);
                     if (member != null && (member.Status == ChatMemberStatus.Administrator || member.Status == ChatMemberStatus.Creator))
                     {
-                        await botClient.SendMessage(chatId, $"⚠️ [{(message.From.FirstName ?? message.From.Username)}](tg://user?id={message.From.Id}), прекрати спамить в чат!", ParseMode.Markdown, replyParameters: message.MessageId, cancellationToken: ct).ConfigureAwait(false);
+                        await botClient.SendMessage(chatId, $"⚠️ [{(message.From.FirstName ?? message.From.Username)}](tg://user?id={message.From.Id}), прекрати спамить в чат!", ParseMode.Markdown, replyParameters: message.MessageId, cancellationToken: ct);
                         return;
                     }
 
@@ -93,13 +91,13 @@ namespace MyUpdatedBot.Core.Handlers
                         CanAddWebPagePreviews = false
                     };
 
-                    await botClient.RestrictChatMember(chatId, userId, perms, untilDate: until, cancellationToken: ct).ConfigureAwait(false);
-                    await botClient.SendMessage(chatId, $"⚠️ [{(message.From.FirstName ?? message.From.Username)}](tg://user?id={message.From.Id}) получил мут на {MuteDuration} часа (3/3).", ParseMode.Markdown, replyParameters: message.MessageId, cancellationToken: ct).ConfigureAwait(false);
+                    await botClient.RestrictChatMember(chatId, userId, perms, untilDate: until, cancellationToken: ct);
+                    await botClient.SendMessage(chatId, $"⚠️ [{(message.From.FirstName ?? message.From.Username)}](tg://user?id={message.From.Id}) получил мут на {MuteDuration.TotalHours} часа (3/3).", ParseMode.Markdown, replyParameters: message.MessageId, cancellationToken: ct);
                     _logger.LogInformation("[SpamMessageHandler]: Muted user {User} in chat {Chat}", userId, chatId);
                 }
                 else
                 {
-                    await botClient.SendMessage(chatId, $"⚠️ [{(message.From.FirstName ?? message.From.Username)}](tg://user?id={message.From.Id}), перестань спамить. Предупреждение {warnings}/{MaxWarnings}.", ParseMode.Markdown, replyParameters: message.MessageId, cancellationToken: ct).ConfigureAwait(false);
+                    await botClient.SendMessage(chatId, $"⚠️ [{(message.From.FirstName ?? message.From.Username)}](tg://user?id={message.From.Id}), перестань спамить. Предупреждение {warnings}/{MaxWarnings}.", ParseMode.Markdown, replyParameters: message.MessageId, cancellationToken: ct);
                 }
             }
             catch (Exception ex)

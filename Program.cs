@@ -3,9 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using MyUpdatedBot.Cache;
 using MyUpdatedBot.Cache.ChatSettingsStore;
 using MyUpdatedBot.Cache.ReportsStore;
+using MyUpdatedBot.Cache.SpamStore;
 using MyUpdatedBot.Core.Handlers;
 using MyUpdatedBot.Core.Handlers.ChatSettingsHandlers;
 using MyUpdatedBot.Core.Handlers.CrocodileHandlers;
@@ -91,7 +91,7 @@ try
             services.AddMemoryCache();
             services.AddSingleton<IUserReportsThrottleStore, UserReportsThrottleStore>();
             services.AddSingleton<IReportsProcessedStore, ReportsProcessedStore>();
-            services.AddSingleton<ISpamStore, SpamStore>();
+            services.AddSingleton<IFloodStore, FloodStore>();
             services.AddSingleton<IChatSettingsStore, ChatSettingsStore>();
 
             // Other scoped-services

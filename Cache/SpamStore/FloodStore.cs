@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
-namespace MyUpdatedBot.Cache
+namespace MyUpdatedBot.Cache.SpamStore
 {
-    public class SpamStore : ISpamStore
+    public class FloodStore : IFloodStore
     {
         private readonly IMemoryCache _cache;
-        private readonly ILogger<SpamStore> _logger;
+        private readonly ILogger<FloodStore> _logger;
         private readonly TimeSpan _window = TimeSpan.FromSeconds(2);
         private readonly int _limit = 5;
         private static readonly TimeSpan EntryTtl = TimeSpan.FromSeconds(5);
@@ -14,7 +14,7 @@ namespace MyUpdatedBot.Cache
         private static string SpamKey(long chatId, long userId) => $"spamwin:{chatId}:{userId}";
         private static string WarningCountKey(long chatId, long userId) => $"warncount:{chatId}:{userId}";
 
-        public SpamStore(IMemoryCache cache, ILogger<SpamStore> logger)
+        public FloodStore(IMemoryCache cache, ILogger<FloodStore> logger)
         {
             _cache = cache;
             _logger = logger;
@@ -31,7 +31,7 @@ namespace MyUpdatedBot.Cache
                 return new SpamWindow(_limit, _window);
             });
 
-            return await window.AddAndCheckAsync(ct).ConfigureAwait(false);
+            return await window.AddAndCheckAsync(ct);
         }
 
         public void SetCachedWarningsCount(long chatId, long userId, int count)
@@ -39,18 +39,6 @@ namespace MyUpdatedBot.Cache
             var key = WarningCountKey(chatId, userId);
             _cache.Set(key, count, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(5) });
             _logger.LogDebug("[SpamStore]: Set cached warnings count for chat={Chat} user={User}: {Count}", chatId, userId, count);
-        }
-
-        public int? TryGetCachedWarningsCount(long chatId, long userId)
-        {
-            var key = WarningCountKey(chatId, userId);
-            if (_cache.TryGetValue<int>(key, out var v))
-            {
-                _logger.LogDebug("[SpamStore]: WarnCount cache hit for chat={Chat} user={User}: {Count}", chatId, userId, v);
-                return v;
-            }
-            _logger.LogDebug("[SpamStore]: WarnCount cache miss for chat={Chat} user={User}", chatId, userId);
-            return null;
         }
 
         // inner async-safe
@@ -69,7 +57,7 @@ namespace MyUpdatedBot.Cache
 
             public async Task<bool> AddAndCheckAsync(CancellationToken ct = default)
             {
-                await _sem.WaitAsync(ct).ConfigureAwait(false);
+                await _sem.WaitAsync(ct);
                 try
                 {
                     var nowTicks = DateTime.UtcNow.Ticks;

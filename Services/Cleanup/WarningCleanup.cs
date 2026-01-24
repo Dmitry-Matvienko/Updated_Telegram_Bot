@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MyUpdatedBot.Cache;
+using MyUpdatedBot.Cache.SpamStore;
 using MyUpdatedBot.Infrastructure.Data;
 
 namespace MyUpdatedBot.Services.Cleanup
@@ -31,7 +31,7 @@ namespace MyUpdatedBot.Services.Cleanup
             {
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
-                var spamStore = scope.ServiceProvider.GetService<ISpamStore>();
+                var spamStore = scope.ServiceProvider.GetService<IFloodStore>();
 
                 while (!cancellationToken.IsCancellationRequested)
                 {
