@@ -14,7 +14,7 @@ namespace MyUpdatedBot.Cache.SpamStore
         private static string BucketKey(long chatId, long userId) => $"tokenbucket:{chatId}:{userId}";
         private static string WarningCountKey(long chatId, long userId) => $"warncount:{chatId}:{userId}";
 
-        public FloodStore(IMemoryCache cache, ILogger<FloodStore> logger, TimeSpan? entryTtl)
+        public FloodStore(IMemoryCache cache, ILogger<FloodStore> logger, TimeSpan? entryTtl = null)
         {
             _cache = cache;
             _logger = logger;
