@@ -6,12 +6,10 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using MyUpdatedBot.Cache.ReportsStore;
 
-public class UserReportHandler : ICommandHandler
+public class UserReportHandler : IMessageHandler
 {
     private readonly ILogger<UserReportHandler> _logger;
     private readonly IThrottleStore _throttle;
-
-    // delay between complaints from one user in one chat
 
     public UserReportHandler(ILogger<UserReportHandler> logger, IThrottleStore throttle)
     {
@@ -19,12 +17,14 @@ public class UserReportHandler : ICommandHandler
         _throttle = throttle;
     }
 
-    public bool CanHandle(string text)
+    public bool CanHandle(Message? message)
     {
-        if (string.IsNullOrWhiteSpace(text)) return false;
-        var t = text.Trim();
-        return t.Equals("!админ", StringComparison.OrdinalIgnoreCase)
-            || t.Equals("!report", StringComparison.OrdinalIgnoreCase);
+        if (message?.From == null || message.Chat == null || message.From.IsBot) return false;
+        if (message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup) return false;
+        if (string.IsNullOrWhiteSpace(message.Text)) return false;
+
+        return message.Text.Equals("!админ", StringComparison.OrdinalIgnoreCase)
+            || message.Text.Equals("!report", StringComparison.OrdinalIgnoreCase);
     }
 
     public async Task HandleAsync(ITelegramBotClient botClient, Message message, CancellationToken ct)
