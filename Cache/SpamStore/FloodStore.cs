@@ -7,73 +7,78 @@ namespace MyUpdatedBot.Cache.SpamStore
     {
         private readonly IMemoryCache _cache;
         private readonly ILogger<FloodStore> _logger;
-        private readonly TimeSpan _window = TimeSpan.FromSeconds(2);
-        private readonly int _limit = 5;
-        private static readonly TimeSpan EntryTtl = TimeSpan.FromSeconds(5);
+        private readonly TimeSpan _window = TimeSpan.FromSeconds(4);
+        private readonly int _limit = 3;
+        private readonly TimeSpan _entryTtl;
 
-        private static string SpamKey(long chatId, long userId) => $"spamwin:{chatId}:{userId}";
+        private static string BucketKey(long chatId, long userId) => $"tokenbucket:{chatId}:{userId}";
         private static string WarningCountKey(long chatId, long userId) => $"warncount:{chatId}:{userId}";
 
-        public FloodStore(IMemoryCache cache, ILogger<FloodStore> logger)
+        public FloodStore(IMemoryCache cache, ILogger<FloodStore> logger, TimeSpan? entryTtl)
         {
             _cache = cache;
             _logger = logger;
+            _entryTtl = entryTtl ?? TimeSpan.FromMicroseconds(15);
         }
 
-        public async Task<bool> AddAndCheckAsync(long chatId, long userId, CancellationToken ct = default)
+        public Task<bool> AddAndCheckAsync(long chatId, long userId)
         {
-            var key = SpamKey(chatId, userId);
+            var key = BucketKey(chatId, userId);
 
-            var window = _cache.GetOrCreate(key, entry =>
+            var bucket = _cache.GetOrCreate(key, entry =>
             {
-                entry.AbsoluteExpirationRelativeToNow = EntryTtl;
-                _logger.LogDebug("[SpamStore]: Creating SpamWindow for chat={Chat} user={User}", chatId, userId);
-                return new SpamWindow(_limit, _window);
+                entry.SlidingExpiration = _entryTtl;
+                _logger?.LogDebug("[FloodStore]: Creating TokenBucket for chat={Chat} user={User}", chatId, userId);
+                return new TokenBucket(_limit, _window);
             });
 
-            return await window.AddAndCheckAsync(ct);
+            var allowed = bucket.TryConsume();
+            return Task.FromResult(!allowed);
         }
 
         public void SetCachedWarningsCount(long chatId, long userId, int count)
         {
             var key = WarningCountKey(chatId, userId);
-            _cache.Set(key, count, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(5) });
-            _logger.LogDebug("[SpamStore]: Set cached warnings count for chat={Chat} user={User}: {Count}", chatId, userId, count);
+            _cache.Set(key, count, new MemoryCacheEntryOptions { SlidingExpiration = TimeSpan.FromSeconds(5) });
+            _logger.LogDebug("[FloodStore]: Set cached warnings count for chat={Chat} user={User}: {Count}", chatId, userId, count);
         }
 
-        // inner async-safe
-        private class SpamWindow
+        private class TokenBucket
         {
-            private readonly SemaphoreSlim _sem = new(1, 1);
-            private readonly Queue<long> _q = new();
-            private readonly int _limit;
-            private readonly long _windowTicks;
+            private readonly object _sync = new();
+            private double _tokens;
+            private long _lastRefillMs;
+            private readonly int _capacity;
+            private readonly double _tokensPerMs;
 
-            public SpamWindow(int limit, TimeSpan window)
+            public TokenBucket(int capacity, TimeSpan window)
             {
-                _limit = limit;
-                _windowTicks = window.Ticks;
+                _capacity = capacity;
+                _tokens = capacity;
+                _lastRefillMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                _tokensPerMs = capacity / window.TotalMilliseconds; // double
             }
 
-            public async Task<bool> AddAndCheckAsync(CancellationToken ct = default)
+            //true - token allowed
+            public bool TryConsume()
             {
-                await _sem.WaitAsync(ct);
-                try
+                var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                lock (_sync)
                 {
-                    var nowTicks = DateTime.UtcNow.Ticks;
-                    var cutoff = nowTicks - _windowTicks;
-                    while (_q.Count > 0 && _q.Peek() < cutoff) _q.Dequeue();
-                    _q.Enqueue(nowTicks);
-                    if (_q.Count >= _limit)
+                    var elapsed = now - _lastRefillMs;
+                    if (elapsed > 0)
                     {
-                        _q.Clear(); // prevent immediate retrigger
+                        _tokens = Math.Min(_capacity, _tokens + elapsed * _tokensPerMs);
+                        _lastRefillMs = now;
+                    }
+
+                    if (_tokens >= 1.0)
+                    {
+                        _tokens -= 1.0;
                         return true;
                     }
+
                     return false;
-                }
-                finally
-                {
-                    _sem.Release();
                 }
             }
         }

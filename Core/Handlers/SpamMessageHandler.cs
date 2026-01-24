@@ -54,7 +54,7 @@ namespace MyUpdatedBot.Core.Handlers
             if (!settings.SpamProtectionEnabled) return;
 
             // quick in-memory detector
-            var isSpam = await _spamStore.AddAndCheckAsync(chatId, userId, ct);
+            var isSpam = await _spamStore.AddAndCheckAsync(chatId, userId);
             if (!isSpam) return;
 
             int warnings;
