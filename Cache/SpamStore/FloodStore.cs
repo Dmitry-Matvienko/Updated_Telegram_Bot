@@ -18,7 +18,7 @@ namespace MyUpdatedBot.Cache.SpamStore
         {
             _cache = cache;
             _logger = logger;
-            _entryTtl = entryTtl ?? TimeSpan.FromMicroseconds(15);
+            _entryTtl = entryTtl ?? TimeSpan.FromSeconds(15);
         }
 
         public Task<bool> AddAndCheckAsync(long chatId, long userId)
