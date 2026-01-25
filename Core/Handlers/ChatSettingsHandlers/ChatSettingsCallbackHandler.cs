@@ -38,11 +38,11 @@ namespace MyUpdatedBot.Core.Handlers.ChatSettingsHandlers
             ChatMember? member = null;
             try
             {
-                member = await botClient.GetChatMember(chatId, fromId, ct).ConfigureAwait(false);
+                member = await botClient.GetChatMember(chatId, fromId, ct);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "SettingsCallback: GetChatMember failed for {Chat}/{User}", chatId, fromId);
+                _logger.LogWarning(ex, "[SettingsCallbackHandler]: GetChatMember failed for {Chat}/{User}", chatId, fromId);
             }
 
             if (member == null || !(member.Status == ChatMemberStatus.Administrator || member.Status == ChatMemberStatus.Creator))
@@ -51,9 +51,10 @@ namespace MyUpdatedBot.Core.Handlers.ChatSettingsHandlers
                 return;
             }
 
+            var current = await _settingsService.GetOrCreateAsync(chatId, ct);
             if (data == "settings:toggle:links")
             {
-                var updated = await _settingsService.SetLinksAllowedAsync(chatId, !(await _settingsService.GetOrCreateAsync(chatId, ct)).LinksAllowed, ct);
+                var updated = await _settingsService.SetLinksAllowedAsync(chatId, !current.LinksAllowed, ct);
                 // update cache with the new settings
                 _settingsCache.Set(chatId, updated);
 
@@ -67,7 +68,10 @@ namespace MyUpdatedBot.Core.Handlers.ChatSettingsHandlers
                 {
                     await botClient.EditMessageReplyMarkup(chatId, callback.Message.MessageId, kb, cancellationToken: ct);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "[SettingsCallbackHandler]: Failed to EditMessageReplyMarkup for chat {Chat}, data: {data}", chatId, data);
+                }
 
                 await botClient.AnswerCallbackQuery(callback.Id, $"Разрешить ссылки {(updated.LinksAllowed ? "✅" : "❌")}", cancellationToken: ct);
                 return;
@@ -75,7 +79,7 @@ namespace MyUpdatedBot.Core.Handlers.ChatSettingsHandlers
 
             if (data == "settings:toggle:spam")
             {
-                var updated = await _settingsService.SetSpamProtectionAsync(chatId, !(await _settingsService.GetOrCreateAsync(chatId, ct)).SpamProtectionEnabled, ct);
+                var updated = await _settingsService.SetSpamProtectionAsync(chatId, !current.SpamProtectionEnabled, ct);
                 _settingsCache.Set(chatId, updated);
 
                 var kb = new InlineKeyboardMarkup(new[]
@@ -88,7 +92,10 @@ namespace MyUpdatedBot.Core.Handlers.ChatSettingsHandlers
                 {
                     await botClient.EditMessageReplyMarkup(chatId, callback.Message.MessageId, kb, cancellationToken: ct);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "[SettingsCallbackHandler]: Failed to EditMessageReplyMarkup for chat {Chat}, data: {data}", chatId, data);
+                }
 
                 await botClient.AnswerCallbackQuery(callback.Id, $"Защита от флуда {(updated.SpamProtectionEnabled ? "✅" : "❌")}", cancellationToken: ct);
                 return;

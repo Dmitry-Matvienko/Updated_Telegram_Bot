@@ -114,6 +114,7 @@ try
             services.AddTransient<IMessageHandler, CrocodileGuessHandler>();
             services.AddTransient<IMessageHandler, LinkDetectionHandler>();
             services.AddTransient<IMessageHandler, UserReportHandler>();
+            services.AddTransient<IMessageHandler, ChatSettingsHandler>();
 
             // Command handlers
             services.AddTransient<ICommandHandler, TopMessageCountHandler>();
@@ -122,7 +123,6 @@ try
             services.AddTransient<ICommandHandler, CrocodileHandler>();
             services.AddTransient<ICommandHandler, OwnerCommandHandler>();
             services.AddTransient<ICommandHandler, RollGameHandler>();
-            services.AddTransient<ICommandHandler, ChatSettingsHandler>();
 
             // Button handlers
             services.AddTransient<IButtonHandlers, CrocodileButtonHandler>();

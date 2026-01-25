@@ -8,7 +8,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace MyUpdatedBot.Core.Handlers.ChatSettingsHandlers
 {
-    public class ChatSettingsHandler : ICommandHandler
+    public class ChatSettingsHandler : IMessageHandler
     {
         private readonly IChatSettingsService _settingsService;
         private readonly IChatSettingsStore _settingsCache;
@@ -19,10 +19,13 @@ namespace MyUpdatedBot.Core.Handlers.ChatSettingsHandlers
             _settingsCache = settingsCache;
         }
 
-        public bool CanHandle(string text)
+        public bool CanHandle(Message? message)
         {
-            if (string.IsNullOrWhiteSpace(text)) return false;
-            return text.StartsWith("/settings", StringComparison.OrdinalIgnoreCase);
+            if (message?.From == null || message.Chat == null || message.From.IsBot) return false;
+            if (message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup) return false;
+            if (string.IsNullOrWhiteSpace(message.Text)) return false;
+
+            return message.Text.StartsWith("/settings", StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task HandleAsync(ITelegramBotClient botClient, Message message, CancellationToken ct)
@@ -36,18 +39,12 @@ namespace MyUpdatedBot.Core.Handlers.ChatSettingsHandlers
                 _settingsCache.Set(chatId, settings);
             }
 
-            var kb = BuildSettingsKeyboard(settings);
-            await botClient.SendMessage(chatId, "Настройки чата:", replyMarkup: kb, parseMode: ParseMode.Html, cancellationToken: ct);
-        }
-
-        private InlineKeyboardMarkup BuildSettingsKeyboard(ChatSettingsEntity s)
-        {
-            var rows = new[]
+            var buttons = new InlineKeyboardMarkup(new[]
             {
-                new[] { InlineKeyboardButton.WithCallbackData($"Защита от флуда {(s.SpamProtectionEnabled ? "✅" : "❌")}", $"settings:toggle:spam") },
-                new[] { InlineKeyboardButton.WithCallbackData($"Разрешить ссылки {(s.LinksAllowed ? "✅" : "❌")}", $"settings:toggle:links") }
-            };
-            return new InlineKeyboardMarkup(rows);
+                new[] { InlineKeyboardButton.WithCallbackData($"Защита от флуда {(settings.SpamProtectionEnabled ? "✅" : "❌")}", $"settings:toggle:spam") },
+                new[] { InlineKeyboardButton.WithCallbackData($"Разрешить ссылки {(settings.LinksAllowed ? "✅" : "❌")}", $"settings:toggle:links") }
+            });
+            await botClient.SendMessage(chatId, "Настройки чата:", replyMarkup: buttons, parseMode: ParseMode.Html, cancellationToken: ct);
         }
     }
 }
