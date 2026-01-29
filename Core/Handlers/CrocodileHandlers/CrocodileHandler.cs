@@ -1,24 +1,24 @@
-﻿using Mono.TextTemplating;
-using MyUpdatedBot.Services.CrocodileGame;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MyUpdatedBot.Services.CrocodileGame;
 using Telegram.Bot;
-using Telegram.Bot.Extensions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
 {
-    public class CrocodileHandler : ICommandHandler
+    public class CrocodileHandler : IMessageHandler
     {
         private readonly ICrocodileService _games;
 
         public CrocodileHandler(ICrocodileService games) => _games = games;
-        public bool CanHandle(string text) => text.StartsWith("/crocodile", StringComparison.OrdinalIgnoreCase);
+        public bool CanHandle(Message? message)
+        {
+            if (message?.From == null || message.Chat == null || message.From.IsBot) return false;
+            if (message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup) return false;
+            if (string.IsNullOrWhiteSpace(message.Text)) return false;
+
+            return message.Text.StartsWith("/crocodile", StringComparison.OrdinalIgnoreCase);
+        }
 
         public async Task HandleAsync(ITelegramBotClient botClient, Message message, CancellationToken ct)
         {
