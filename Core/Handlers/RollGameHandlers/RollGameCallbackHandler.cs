@@ -16,26 +16,26 @@ namespace MyUpdatedBot.Core.Handlers.RollGameHandlers
         public bool CanHandle(CallbackQuery callback) => !string.IsNullOrEmpty(callback.Data)
         && (callback.Data.StartsWith("roll:") || callback.Data.StartsWith("stop:"));
 
-        public async Task HandleAsync(ITelegramBotClient client, CallbackQuery callback, CancellationToken ct)
+        public async Task HandleAsync(ITelegramBotClient botClient, CallbackQuery callback, CancellationToken ct)
         {
             var data = callback.Data!;
             if (data.StartsWith("roll:"))
             {
                 if (!Guid.TryParseExact(data.Substring(5), "N", out var id))
                 {
-                    await client.AnswerCallbackQuery(callback.Id, "Некорректный идентификатор", cancellationToken: ct);
+                    await botClient.AnswerCallbackQuery(callback.Id, "Некорректный идентификатор", cancellationToken: ct);
                     return;
                 }
 
-                var res = _rollService.TryRoll(id, callback.From.Id, callback.From.FirstName);
+                var rollResult = _rollService.TryRoll(id, callback.From.Id, callback.From.FirstName);
 
-                if (!res.Ok)
+                if (!rollResult.Ok)
                 {
-                    await client.AnswerCallbackQuery(callback.Id, "Игра уже закончена", showAlert: true, cancellationToken: ct);
+                    await botClient.AnswerCallbackQuery(callback.Id, "Игра уже закончена", showAlert: true, cancellationToken: ct);
                     return;
                 }
 
-                await client.AnswerCallbackQuery(callback.Id, res.FirstTime ? $"Твой бросок: {res.Value}" : $"Ты уже бросал: {res.Value}", showAlert: true, cancellationToken: ct);
+                await botClient.AnswerCallbackQuery(callback.Id, rollResult.FirstTime ? $"Твой бросок: {rollResult.Value}" : $"Ты уже бросал: {rollResult.Value}", showAlert: true, cancellationToken: ct);
 
                 if (_rollService.TryGetEvent(id, out var state) && state.MessageId != 0)
                 {
@@ -43,7 +43,7 @@ namespace MyUpdatedBot.Core.Handlers.RollGameHandlers
                     try
                     {
                         var text = BuildLeaderBoardText(state, finished: false);
-                        await client.EditMessageText(state.ChatId, state.MessageId, text, ParseMode.Markdown, replyMarkup: callback.Message!.ReplyMarkup, cancellationToken: ct);
+                        await botClient.EditMessageText(state.ChatId, state.MessageId, text, ParseMode.Markdown, replyMarkup: callback.Message!.ReplyMarkup, cancellationToken: ct);
                     }
                     finally
                     {
@@ -55,27 +55,27 @@ namespace MyUpdatedBot.Core.Handlers.RollGameHandlers
             {
                 if (!Guid.TryParseExact(data.Substring(5), "N", out var id))
                 {
-                    await client.AnswerCallbackQuery(callback.Id, "Некорректный идентификатор", cancellationToken: ct);
+                    await botClient.AnswerCallbackQuery(callback.Id, "Некорректный идентификатор", cancellationToken: ct);
                     return;
                 }
 
                 if (!_rollService.TryGetEvent(id, out var state))
                 {
-                    await client.AnswerCallbackQuery(callback.Id, "Игра уже закончена", showAlert: true, cancellationToken: ct);
+                    await botClient.AnswerCallbackQuery(callback.Id, "Игра уже закончена", showAlert: true, cancellationToken: ct);
                     return;
                 }
 
                 if (callback.From.Id != state.HostUserId)
                 {
-                    await client.AnswerCallbackQuery(callback.Id, "Только ведущий может остановить розыгрыш", showAlert: true, cancellationToken: ct);
+                    await botClient.AnswerCallbackQuery(callback.Id, "Только ведущий может остановить розыгрыш", showAlert: true, cancellationToken: ct);
                     return;
                 }
 
                 _rollService.StopEvent(id);
-                await client.AnswerCallbackQuery(callback.Id, "Розыгрыш остановлен", showAlert: true, cancellationToken: ct);
+                await botClient.AnswerCallbackQuery(callback.Id, "Розыгрыш остановлен", showAlert: true, cancellationToken: ct);
 
                 var finalText = BuildLeaderBoardText(state, finished: true);
-                await client.EditMessageText(state.ChatId, state.MessageId, "🛑 Розыгрыш остановлен\n\n" + finalText, ParseMode.Markdown, replyMarkup: null, cancellationToken: ct);
+                await botClient.EditMessageText(state.ChatId, state.MessageId, "🛑 Розыгрыш остановлен\n\n" + finalText, ParseMode.Markdown, replyMarkup: null, cancellationToken: ct);
             }
         }
 
