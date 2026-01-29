@@ -1,23 +1,15 @@
-﻿using Microsoft.Extensions.Logging;
-using Mono.TextTemplating;
-using MyUpdatedBot.Services.CrocodileGame;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MyUpdatedBot.Services.CrocodileGame;
 using Telegram.Bot;
-using Telegram.Bot.Extensions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
 {
-    public class CrocodileButtonHandler : IButtonHandlers
+    public class CrocodileCallbackHandler : IButtonHandlers
     {
         private readonly ICrocodileService _games;
 
-        public CrocodileButtonHandler(ICrocodileService games) => _games = games;
+        public CrocodileCallbackHandler(ICrocodileService games) => _games = games;
         public bool CanHandle(CallbackQuery callback)
         {
             // process buttons if there is an active game in this chat
