@@ -126,7 +126,7 @@ try
 
             // Button handlers
             services.AddTransient<IButtonHandlers, CrocodileCallbackHandler>();
-            services.AddTransient<IButtonHandlers, RollGameButtonHandler>();
+            services.AddTransient<IButtonHandlers, RollGameCallbackHandler>();
             services.AddTransient<IButtonHandlers, AdminReportCallbackHandler>();
             services.AddTransient<IButtonHandlers, SettingsCallbackHandler>();
 

@@ -7,11 +7,11 @@ using Telegram.Bot.Types.Enums;
 
 namespace MyUpdatedBot.Core.Handlers.RollGameHandlers
 {
-    public class RollGameButtonHandler : IButtonHandlers
+    public class RollGameCallbackHandler : IButtonHandlers
     {
         private readonly IRollService _rollService;
 
-        public RollGameButtonHandler(IRollService rollService) { _rollService = rollService; }
+        public RollGameCallbackHandler(IRollService rollService) { _rollService = rollService; }
 
         public bool CanHandle(CallbackQuery callback) => !string.IsNullOrEmpty(callback.Data)
         && (callback.Data.StartsWith("roll:") || callback.Data.StartsWith("stop:"));
