@@ -1,37 +1,35 @@
 ﻿using Microsoft.Extensions.Logging;
-using MyUpdatedBot.Infrastructure.Data;
 using MyUpdatedBot.Services.UserReputation;
 using MyUpdatedBot.Services.UserLeaderboard;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace MyUpdatedBot.Core.Handlers
 {
-    public class ReputationHandler : ICommandHandler
+    public class ReputationHandler : IMessageHandler
     {
-        private readonly IReputationService _ratingService;
+        private readonly IReputationService _reputationService;
         private readonly ILogger<ReputationHandler> _logger;
         private readonly IUserLeaderboardService _userLeaderboard;
 
-        public ReputationHandler(IReputationService ratingService, ILogger<ReputationHandler> logger, IUserLeaderboardService userLeaderboard)
+        public ReputationHandler(IReputationService reputationService, ILogger<ReputationHandler> logger, IUserLeaderboardService userLeaderboard)
         {
-            _ratingService = ratingService;
+            _reputationService = reputationService;
             _logger = logger;
             _userLeaderboard = userLeaderboard;
         }
 
-        public bool CanHandle(string text)
+        public bool CanHandle(Message? message)
         {
-            return text.StartsWith("Спасибо", StringComparison.OrdinalIgnoreCase)
-                || text.StartsWith("Благодарю", StringComparison.OrdinalIgnoreCase)
-                || text.StartsWith("/localrating", StringComparison.OrdinalIgnoreCase)
-                || text.StartsWith("/globalrating", StringComparison.OrdinalIgnoreCase);
+            if (message?.From == null || message.Chat == null || message.From.IsBot) return false;
+            if (message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup) return false;
+            if (string.IsNullOrWhiteSpace(message.Text)) return false;
+
+            return message.Text.StartsWith("Спасибо", StringComparison.OrdinalIgnoreCase)
+                || message.Text.StartsWith("Благодарю", StringComparison.OrdinalIgnoreCase)
+                || message.Text.StartsWith("/localrating", StringComparison.OrdinalIgnoreCase)
+                || message.Text.StartsWith("/globalrating", StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task HandleAsync(ITelegramBotClient botClient, Message message, CancellationToken ct)
@@ -66,7 +64,7 @@ namespace MyUpdatedBot.Core.Handlers
                 || message.From?.Id == message.ReplyToMessage.From?.Id)
                 return;
 
-            var given = await _ratingService.GiveReputationAsync(
+            var given = await _reputationService.GiveReputationAsync(
                 fromUserId: message.From!.Id,
                 toUserId: message.ReplyToMessage.From!.Id,
                 chatId: message.Chat.Id,
