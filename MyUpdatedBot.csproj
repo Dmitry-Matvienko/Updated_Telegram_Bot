@@ -36,6 +36,7 @@
   
   <ItemGroup>
     <Folder Include="Cache\SpamStore\" />
+    <Folder Include="Core\Handlers\SpamHandlers\" />
   </ItemGroup>
 
 </Project>
