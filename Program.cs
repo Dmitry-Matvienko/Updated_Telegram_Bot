@@ -109,20 +109,21 @@ try
             services.AddTransient<IUpdateHandlerService, UpdateDispatcher>();
 
             // Message handlers
-            services.AddTransient<IMessageHandler, CountMessageHandler>();
+            services.AddTransient<IMessageHandler, MessageCountHandler>();
             services.AddTransient<IMessageHandler, SpamMessageHandler>();
             services.AddTransient<IMessageHandler, CrocodileGuessHandler>();
             services.AddTransient<IMessageHandler, LinkDetectionHandler>();
             services.AddTransient<IMessageHandler, UserReportHandler>();
             services.AddTransient<IMessageHandler, ChatSettingsHandler>();
+            services.AddTransient<IMessageHandler, CrocodileHandler>();
+            services.AddTransient<IMessageHandler, RollGameHandler>();
+            services.AddTransient<IMessageHandler, TopMessageCountHandler>();
+            services.AddTransient<IMessageHandler, ReputationHandler>();
 
             // Command handlers
-            services.AddTransient<ICommandHandler, TopMessageCountHandler>();
-            services.AddTransient<ICommandHandler, ReputationHandler>();
+
             services.AddTransient<ICommandHandler, OptionalHandler>();
-            services.AddTransient<ICommandHandler, CrocodileHandler>();
             services.AddTransient<ICommandHandler, OwnerCommandHandler>();
-            services.AddTransient<ICommandHandler, RollGameHandler>();
 
             // Button handlers
             services.AddTransient<IButtonHandlers, CrocodileCallbackHandler>();
