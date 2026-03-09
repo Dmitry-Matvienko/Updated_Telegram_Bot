@@ -31,6 +31,7 @@ namespace MyUpdatedBot.Core.Handlers
         {
             if (message?.From == null || message.Chat == null || message.From.IsBot) return false;
             if (string.IsNullOrWhiteSpace(message.Text ?? message.Caption)) return false;
+            if (message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup) return false;
 
             // if cached and LinksAllowed
             if (_settingsCache.TryGet(message.Chat.Id, out var cached) && cached != null && cached.LinksAllowed == true) return false;
@@ -53,7 +54,6 @@ namespace MyUpdatedBot.Core.Handlers
             _settingsCache.Set(message.Chat.Id, settings);
 
             if (settings.LinksAllowed) return;
-
 
             if (TryGetLinkFromEntities(message, out var matched))
             {

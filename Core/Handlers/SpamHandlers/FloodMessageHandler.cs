@@ -11,7 +11,7 @@ namespace MyUpdatedBot.Core.Handlers
 {
     public class SpamMessageHandler : IMessageHandler
     {
-        private readonly IFloodStore _spamStore;
+        private readonly IFloodStore _floodStore;
         private readonly IWarning _warning;
         private readonly ILogger<SpamMessageHandler> _logger;
         private readonly IChatSettingsService _settingsService;
@@ -21,13 +21,13 @@ namespace MyUpdatedBot.Core.Handlers
         private static readonly TimeSpan MuteDuration = TimeSpan.FromHours(24);
 
         public SpamMessageHandler(
-            IFloodStore spamStore,
+            IFloodStore floodStore,
             IWarning warning,
             ILogger<SpamMessageHandler> logger,
             IChatSettingsService settingsService,
             IChatSettingsStore settingsCache)
         {
-            _spamStore = spamStore;
+            _floodStore = floodStore;
             _warning = warning;
             _logger = logger;
             _settingsService = settingsService;
@@ -54,7 +54,7 @@ namespace MyUpdatedBot.Core.Handlers
             if (!settings.SpamProtectionEnabled) return;
 
             // quick in-memory detector
-            var isSpam = await _spamStore.AddAndCheckAsync(chatId, userId);
+            var isSpam = await _floodStore.AddAndCheckAsync(chatId, userId);
             if (!isSpam) return;
 
             int warnings;
@@ -69,7 +69,7 @@ namespace MyUpdatedBot.Core.Handlers
             }
 
             // Synchronize the warning cache in memory 
-            _spamStore.SetCachedWarningsCount(chatId, userId, warnings);
+            _floodStore.SetCachedWarningsCount(chatId, userId, warnings);
 
             try
             {
