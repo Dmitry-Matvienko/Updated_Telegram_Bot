@@ -1,15 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using MyUpdatedBot.Infrastructure.Data;
+﻿using Microsoft.Extensions.Logging;
 using MyUpdatedBot.Services.UserLeaderboard;
-using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace MyUpdatedBot.Core.Handlers
 {
-    public class TopMessageCountHandler : ICommandHandler
+    public class TopMessageCountHandler : IMessageHandler
     {
         private readonly IUserLeaderboardService _userLeaderboard;
         private readonly ILogger<TopMessageCountHandler> _logger;
@@ -20,11 +17,14 @@ namespace MyUpdatedBot.Core.Handlers
             _logger = logger;
         }
 
-        public bool CanHandle(string text)
+        public bool CanHandle(Message? message)
         {
-            text = text?.Trim() ?? "";
-            return text.StartsWith("/GlobalMessage", StringComparison.OrdinalIgnoreCase)
-                || text.StartsWith("/LocalMessage", StringComparison.OrdinalIgnoreCase);
+            if (message?.From == null || message.Chat == null || message.From.IsBot) return false;
+            if (message.Chat.Type != ChatType.Group && message.Chat.Type != ChatType.Supergroup) return false;
+            if (string.IsNullOrWhiteSpace(message.Text)) return false;
+
+            return message.Text.StartsWith("/GlobalMessage", StringComparison.OrdinalIgnoreCase)
+                || message.Text.StartsWith("/LocalMessage", StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task HandleAsync(ITelegramBotClient botClient, Message message, CancellationToken ct)
@@ -35,7 +35,7 @@ namespace MyUpdatedBot.Core.Handlers
             
             var resultText = await _userLeaderboard.TopTen(
                 chatIdFilter: isLocal ? message.Chat.Id : (long?) null,
-                isRating: false, // isRating = false - count the number of messages, not rating.
+                isRating: false, // if isRating = false - count the number of messages, not reputation
                 UserId: message.From!.Id,
                 ct);
 
