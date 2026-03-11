@@ -24,10 +24,10 @@ namespace MyUpdatedBot.Services.SpamProtection
             while (true)
             {
                 attempt++;
-                using var tx = await _db.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
+                using var tx = await _db.Database.BeginTransactionAsync(ct);
                 try
                 {
-                    var user = await _db.Users.FirstOrDefaultAsync(u => u.UserId == telegramUserId, ct).ConfigureAwait(false);
+                    var user = await _db.Users.FirstOrDefaultAsync(u => u.UserId == telegramUserId, ct);
                     if (user is null)
                     {
                         _logger.LogInformation("[WarningService]: User {UserId} not found when adding warning for chat {ChatId}", telegramUserId, chatId);
@@ -36,7 +36,7 @@ namespace MyUpdatedBot.Services.SpamProtection
 
                     var record = await _db.WarningRecords
                         .FirstOrDefaultAsync(w => w.UserRefId == user.Id && w.ChatId == chatId, ct)
-                        .ConfigureAwait(false);
+                        ;
 
                     if (record is null)
                     {
@@ -48,8 +48,8 @@ namespace MyUpdatedBot.Services.SpamProtection
                             CreatedAtUtc = now
                         };
                         _db.WarningRecords.Add(record);
-                        await _db.SaveChangesAsync(ct).ConfigureAwait(false);
-                        await tx.CommitAsync(ct).ConfigureAwait(false);
+                        await _db.SaveChangesAsync(ct);
+                        await tx.CommitAsync(ct);
                         return record.WarningsCount;
                     }
 
@@ -57,21 +57,21 @@ namespace MyUpdatedBot.Services.SpamProtection
                     record.CreatedAtUtc = now;
 
                     _db.WarningRecords.Update(record);
-                    await _db.SaveChangesAsync(ct).ConfigureAwait(false);
-                    await tx.CommitAsync(ct).ConfigureAwait(false);
+                    await _db.SaveChangesAsync(ct);
+                    await tx.CommitAsync(ct);
 
                     return record.WarningsCount;
                 }
                 catch (DbUpdateConcurrencyException ex) when (attempt < MaxRetries)
                 {
                     _logger.LogWarning(ex, "[WarningService]: Concurrency conflict in AddWarningAsync, attempt {Attempt}", attempt);
-                    try { await tx.RollbackAsync(ct).ConfigureAwait(false); } catch { }
-                    await Task.Delay(50 * attempt, ct).ConfigureAwait(false);
+                    try { await tx.RollbackAsync(ct); } catch { }
+                    await Task.Delay(50 * attempt, ct);
                     continue;
                 }
                 catch (Exception ex)
                 {
-                    try { await tx.RollbackAsync(ct).ConfigureAwait(false); } catch { }
+                    try { await tx.RollbackAsync(ct); } catch { }
                     _logger.LogError(ex, "[WarningService]: AddWarningAsync failed");
                     throw;
                 }

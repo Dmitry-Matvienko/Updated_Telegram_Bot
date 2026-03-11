@@ -40,7 +40,7 @@ namespace MyUpdatedBot.Services.Cleanup
 
                     foreach (var taskInfo in due)
                     {
-                        await semaphore.WaitAsync(stoppingToken).ConfigureAwait(false);
+                        await semaphore.WaitAsync(stoppingToken);
 
                         _ = Task.Run(async () =>
                         {
@@ -48,7 +48,7 @@ namespace MyUpdatedBot.Services.Cleanup
                             {
                                 var sw = Stopwatch.StartNew();
                                 _logger.LogInformation("[CleanupHostedService]: {Name} started", taskInfo.Name);
-                                await taskInfo.CleanupAsync(stoppingToken).ConfigureAwait(false);
+                                await taskInfo.CleanupAsync(stoppingToken);
                                 sw.Stop();
                                 _logger.LogInformation("[CleanupHostedService]: {Name} finished in {Elapsed}ms", taskInfo.Name, sw.ElapsedMilliseconds);
                             }
@@ -65,7 +65,7 @@ namespace MyUpdatedBot.Services.Cleanup
                         }, CancellationToken.None);
                     }
 
-                    await Task.Delay(TimeSpan.FromMinutes(_tickMinutes), stoppingToken).ConfigureAwait(false);
+                    await Task.Delay(TimeSpan.FromMinutes(_tickMinutes), stoppingToken);
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
@@ -74,7 +74,7 @@ namespace MyUpdatedBot.Services.Cleanup
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "[CleanupHostedService]: loop error");
-                    try { await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken).ConfigureAwait(false); } catch { }
+                    try { await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken); } catch { }
                 }
             }
 
