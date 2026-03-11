@@ -11,9 +11,9 @@ namespace MyUpdatedBot.Services.Cleanup
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<WarningCleanup> _logger;
         public string Name => "WarningCleanup";
-        public TimeSpan Interval { get; } = TimeSpan.FromMinutes(1); // how often to call this task
+        public TimeSpan Interval { get; } = TimeSpan.FromMinutes(10); // how often to call this task
 
-        private static readonly TimeSpan Window = TimeSpan.FromMinutes(3); // remove warn if it;s older than this time
+        private static readonly TimeSpan Window = TimeSpan.FromHours(24); // remove warn if it;s older than this time
         private const int BatchSize = 200;
         private const int MaxRetries = 3;
 
@@ -41,7 +41,7 @@ namespace MyUpdatedBot.Services.Cleanup
                         .OrderBy(w => w.CreatedAtUtc)
                         .Take(BatchSize)
                         .ToListAsync(cancellationToken)
-                        .ConfigureAwait(false);
+                        ;
 
                     if (items.Count == 0) break;
 
@@ -70,7 +70,7 @@ namespace MyUpdatedBot.Services.Cleanup
                                 rec.CreatedAtUtc = curNow;
 
                                 db.WarningRecords.Update(rec);
-                                await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                                await db.SaveChangesAsync(cancellationToken);
 
                                 // update cache if exist
                                 if (spamStore != null && rec.User != null)
@@ -89,14 +89,14 @@ namespace MyUpdatedBot.Services.Cleanup
                                     var fresh = await db.WarningRecords
                                         .Include(w => w.User)
                                         .FirstOrDefaultAsync(w => w.Id == rec.Id, cancellationToken)
-                                        .ConfigureAwait(false);
+                                        ;
                                     if (fresh == null) break;
                                     rec.WarningsCount = fresh.WarningsCount;
                                     rec.CreatedAtUtc = fresh.CreatedAtUtc;
                                 }
                                 catch { }
 
-                                await Task.Delay(50 * attempt, cancellationToken).ConfigureAwait(false);
+                                await Task.Delay(50 * attempt, cancellationToken);
                                 continue;
                             }
                             catch (Exception ex)
