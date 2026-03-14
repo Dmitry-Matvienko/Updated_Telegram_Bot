@@ -19,6 +19,7 @@
 - **Flood detection** protects the chat/group from attacks
 - **Link detection** searching for and removing links in messages
 - **Chat settings** allow to switch settings for each chat
+- **Summon users** allows you to tag the most active users(80 by default) in batches(20 per message)
 
 ## Project structure
 
@@ -102,6 +103,7 @@ Migrations/     # EF Core migrations
 - `/StartRoll` — a “roll the dice” game with values from 1 to 100 and a leaderboard
 - **Reply to user** «!админ» or «!report» to send a complaint to the admins
 - `/Settings` - show current chat settings
+- `/All` - summon users
 
 ## Architecture
 
