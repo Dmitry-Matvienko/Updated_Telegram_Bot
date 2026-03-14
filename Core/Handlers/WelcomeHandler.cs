@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Globalization;
+﻿using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -57,7 +56,7 @@ namespace MyUpdatedBot.Core.Handlers
             var botId = await GetBotIdAsync(botClient, ct);
             if (message.NewChatMembers!.Any(u => u.Id == botId))
             {
-                var fallbackCulture = NormalizeLanguageCode(message.From?.LanguageCode ?? "en");
+                var fallbackCulture = NormalizeLanguageCode(message.From?.LanguageCode);
                 var cl = new CultureInfo(fallbackCulture);
 
                 await botClient.SendMessage(
