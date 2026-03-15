@@ -8,5 +8,7 @@
         // Feature flags
         public bool SpamProtectionEnabled { get; set; }
         public bool LinksAllowed { get; set; }
+        // two-letter language code en,ru,uk etc
+        public string? Language { get; set; }
     }
 }
