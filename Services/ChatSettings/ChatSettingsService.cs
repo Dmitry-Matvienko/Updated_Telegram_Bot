@@ -124,5 +124,45 @@ namespace MyUpdatedBot.Services.ChatSettings
                 throw;
             }
         }
+
+        public async Task<ChatSettingsEntity> SetLanguageAsync(long chatId, string language, CancellationToken ct)
+        {
+            using var tx = await _db.Database.BeginTransactionAsync(ct);
+            try
+            {
+                var settings = await _db.ChatSettings.FirstOrDefaultAsync(c => c.ChatId == chatId, ct);
+                if (settings == null)
+                {
+                    settings = DefaultFor(chatId);
+                    settings.Language = language;
+                    _db.ChatSettings.Add(settings);
+
+                    _logger.LogInformation("[ChatSettingsService]: SetLanguageAsync for chat {ChatId} with Language={Lang}", chatId, language);
+                }
+                else
+                {
+                    settings.Language = language;
+                    _db.ChatSettings.Update(settings);
+
+                    _logger.LogInformation("[ChatSettingsService]: updating ChatSettings for chat {ChatId}. Language: {Lang}", chatId, language);
+                }
+
+                await _db.SaveChangesAsync(ct);
+                await tx.CommitAsync(ct);
+
+                _logger.LogDebug("[ChatSettingsService]: SetLanguageAsync saved and committed ChatSettings for chat {ChatId}", chatId);
+                return settings;
+            }
+            catch
+            {
+                try
+                {
+                    await tx.RollbackAsync(ct);
+                    _logger.LogWarning("[ChatSettingsService]: transaction SetLanguageAsync rolled back for chat {ChatId}", chatId);
+                }
+                catch { }
+                throw;
+            }
+        }
     }
 }

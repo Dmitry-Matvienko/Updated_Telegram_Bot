@@ -7,5 +7,6 @@ namespace MyUpdatedBot.Services.ChatSettings
         Task<ChatSettingsEntity> GetOrCreateAsync(long chatId, CancellationToken ct);
         Task<ChatSettingsEntity> SetLinksAllowedAsync(long chatId, bool allowed, CancellationToken ct);
         Task<ChatSettingsEntity> SetSpamProtectionAsync(long chatId, bool enabled, CancellationToken ct);
+        Task<ChatSettingsEntity> SetLanguageAsync(long chatId, string language, CancellationToken ct);
     }
 }
