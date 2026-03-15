@@ -76,6 +76,17 @@ namespace MyUpdatedBot.Core.Localization
             return GetStringForCulture(resourceKey, userCulture);
         }
 
+        public string GetLanguageDisplayName(string? code)
+        {
+            return code?.ToLowerInvariant() switch
+            {
+                "ru" => "Русский",
+                "uk" => "Українська",
+                "en" => "English",
+                _ => code ?? "—"
+            };
+        }
+
         private string GetStringForCulture(string resourceKey, string? culture)
         {
             var cacheKey = $"{culture}|{resourceKey}";
