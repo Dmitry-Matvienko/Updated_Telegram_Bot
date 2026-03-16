@@ -44,9 +44,9 @@ namespace MyUpdatedBot.Core.Handlers.ChatSettingsHandlers
             
             var buttons = new InlineKeyboardMarkup(new[]
             {
-                new[] { InlineKeyboardButton.WithCallbackData($"{_loc.GetString(settings, "ChatSettings_SpamProtectionButton")} {(settings.SpamProtectionEnabled ? "✅" : "❌")}", $"settings:toggle:spam") },
-                new[] { InlineKeyboardButton.WithCallbackData($"{_loc.GetString(settings, "ChatSettings_LinksAllowedButton")} {(settings.LinksAllowed ? "✅" : "❌")}", $"settings:toggle:links") },
-                new[] { InlineKeyboardButton.WithCallbackData($"{_loc.GetString(settings, "ChatSettings_LanguageTitle")} {_loc.GetLanguageDisplayName(settings.Language)}", $"settings:toggle:lang:{settings.Language}") },
+                new[] { InlineKeyboardButton.WithCallbackData($"{_loc.GetString(settings, "SpamProtectionButton")} {(settings.SpamProtectionEnabled ? "✅" : "❌")}", $"settings:toggle:spam") },
+                new[] { InlineKeyboardButton.WithCallbackData($"{_loc.GetString(settings, "LinksAllowedButton")} {(settings.LinksAllowed ? "✅" : "❌")}", $"settings:toggle:links") },
+                new[] { InlineKeyboardButton.WithCallbackData($"{_loc.GetString(settings, "LanguageButton")} {_loc.GetLanguageDisplayName(settings.Language)}", $"settings:toggle:lang:{settings.Language}") },
             });
             await botClient.SendMessage(chatId, $"{_loc.GetString(settings, "ChatSettings_Title")}:", replyMarkup: buttons, cancellationToken: ct);
         }
