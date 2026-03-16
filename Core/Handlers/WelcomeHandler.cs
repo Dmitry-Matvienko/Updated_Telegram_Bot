@@ -15,15 +15,15 @@ namespace MyUpdatedBot.Core.Handlers
         {
             new []
             {
-                InlineKeyboardButton.WithCallbackData("🇬🇧 English", "settings:toggle:lang:en"),
+                InlineKeyboardButton.WithCallbackData("🇬🇧 English", "settings:set:lang:en"),
             },
             new []
             {
-                InlineKeyboardButton.WithCallbackData("🇷🇺 Русский", "settings:toggle:lang:ru"),
+                InlineKeyboardButton.WithCallbackData("🇷🇺 Русский", "settings:set:lang:ru"),
             },
             new []
             {
-                InlineKeyboardButton.WithCallbackData("🇺🇦 Українська", "settings:toggle:lang:uk")
+                InlineKeyboardButton.WithCallbackData("🇺🇦 Українська", "settings:set:lang:uk")
             }
         });
 
