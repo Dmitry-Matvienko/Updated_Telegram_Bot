@@ -61,20 +61,11 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Allow links.
+        ///   Ищет локализованную строку, похожую на Add to group.
         /// </summary>
-        internal static string ChatSettings_LinksAllowedButton {
+        internal static string AddToGroupButton {
             get {
-                return ResourceManager.GetString("ChatSettings_LinksAllowedButton", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Flood protection.
-        /// </summary>
-        internal static string ChatSettings_SpamProtectionButton {
-            get {
-                return ResourceManager.GetString("ChatSettings_SpamProtectionButton", resourceCulture);
+                return ResourceManager.GetString("AddToGroupButton", resourceCulture);
             }
         }
         
@@ -97,11 +88,56 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Language is.
+        /// </summary>
+        internal static string LanguageButton {
+            get {
+                return ResourceManager.GetString("LanguageButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Allow links.
+        /// </summary>
+        internal static string LinksAllowedButton {
+            get {
+                return ResourceManager.GetString("LinksAllowedButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на To use all of the bot&apos;s features, add it to your chat.
         /// </summary>
         internal static string MessageAfterChooseLang {
             get {
                 return ResourceManager.GetString("MessageAfterChooseLang", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Only admins can change settings.
+        /// </summary>
+        internal static string OnlyAdminsCanChange {
+            get {
+                return ResourceManager.GetString("OnlyAdminsCanChange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Flood protection.
+        /// </summary>
+        internal static string SpamProtectionButton {
+            get {
+                return ResourceManager.GetString("SpamProtectionButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Unknown command.
+        /// </summary>
+        internal static string UnknownCommand {
+            get {
+                return ResourceManager.GetString("UnknownCommand", resourceCulture);
             }
         }
         

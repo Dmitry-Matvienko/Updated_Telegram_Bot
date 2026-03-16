@@ -117,10 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ChatSettings_LinksAllowedButton" xml:space="preserve">
+  <data name="AddToGroupButton" xml:space="preserve">
+    <value>Add to group</value>
+  </data>
+  <data name="LanguageButton" xml:space="preserve">
+    <value>Language is</value>
+  </data>
+  <data name="LinksAllowedButton" xml:space="preserve">
     <value>Allow links</value>
   </data>
-  <data name="ChatSettings_SpamProtectionButton" xml:space="preserve">
+  <data name="SpamProtectionButton" xml:space="preserve">
     <value>Flood protection</value>
   </data>
   <data name="ChatSettings_Title" xml:space="preserve">
@@ -131,6 +137,12 @@
   </data>
   <data name="MessageAfterChooseLang" xml:space="preserve">
     <value>To use all of the bot's features, add it to your chat</value>
+  </data>
+  <data name="OnlyAdminsCanChange" xml:space="preserve">
+    <value>Only admins can change settings</value>
+  </data>
+  <data name="UnknownCommand" xml:space="preserve">
+    <value>Unknown command</value>
   </data>
   <data name="Welcome_Title" xml:space="preserve">
     <value>Hello! Thanks for adding me.
