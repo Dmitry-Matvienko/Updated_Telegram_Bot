@@ -11,6 +11,7 @@ using MyUpdatedBot.Core.Handlers.ChatSettingsHandlers;
 using MyUpdatedBot.Core.Handlers.CrocodileHandlers;
 using MyUpdatedBot.Core.Handlers.ReportHandlers;
 using MyUpdatedBot.Core.Handlers.RollGameHandlers;
+using MyUpdatedBot.Core.Localization;
 using MyUpdatedBot.Core.Models;
 using MyUpdatedBot.Infrastructure;
 using MyUpdatedBot.Infrastructure.Data;
@@ -21,6 +22,7 @@ using MyUpdatedBot.Services.MessageStats;
 using MyUpdatedBot.Services.OwnerTools;
 using MyUpdatedBot.Services.RollGame;
 using MyUpdatedBot.Services.SpamProtection;
+using MyUpdatedBot.Services.SummonUsers;
 using MyUpdatedBot.Services.UserLeaderboard;
 using MyUpdatedBot.Services.UserReputation;
 using Serilog;
@@ -101,6 +103,8 @@ try
             services.AddScoped<IUserStatsService, UserStatsService>();
             services.AddScoped<IWarning, WarningService>();
             services.AddScoped<IChatSettingsService, ChatSettingsService>();
+            services.AddScoped<ISummonUsers, SummonUsers>();
+            services.AddScoped<LocalizationUtil>();
 
             // Other singleton-services
             services.AddSingleton<IShowMemoryInfo, ShowMemoryInfo>();
@@ -119,10 +123,11 @@ try
             services.AddTransient<IMessageHandler, RollGameHandler>();
             services.AddTransient<IMessageHandler, TopMessageCountHandler>();
             services.AddTransient<IMessageHandler, ReputationHandler>();
+            services.AddTransient<IMessageHandler, SummonUsersHandler>();
+            services.AddTransient<IMessageHandler, WelcomeHandler>();
 
             // Command handlers
 
-            services.AddTransient<ICommandHandler, OptionalHandler>();
             services.AddTransient<ICommandHandler, OwnerCommandHandler>();
 
             // Button handlers
