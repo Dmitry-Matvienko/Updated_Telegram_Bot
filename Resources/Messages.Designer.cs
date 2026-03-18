@@ -70,6 +70,42 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Unable to change the word..
+        /// </summary>
+        internal static string CallbackQuery_CantChangeWord {
+            get {
+                return ResourceManager.GetString("CallbackQuery_CantChangeWord", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на New word.
+        /// </summary>
+        internal static string CallbackQuery_NewWord {
+            get {
+                return ResourceManager.GetString("CallbackQuery_NewWord", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Word.
+        /// </summary>
+        internal static string CallbackQuery_Word {
+            get {
+                return ResourceManager.GetString("CallbackQuery_Word", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Change word.
+        /// </summary>
+        internal static string ChangeWordButton {
+            get {
+                return ResourceManager.GetString("ChangeWordButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Chat settings.
         /// </summary>
         internal static string ChatSettings_Title {
@@ -84,6 +120,69 @@ namespace MyUpdatedBot.Resources {
         internal static string ChosenLanguage {
             get {
                 return ResourceManager.GetString("ChosenLanguage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на has finished the game. To start a new one, type.
+        /// </summary>
+        internal static string Crocodile_EndedGame {
+            get {
+                return ResourceManager.GetString("Crocodile_EndedGame", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Time&apos;s up! To start a new game, send.
+        /// </summary>
+        internal static string Crocodile_TimesUp {
+            get {
+                return ResourceManager.GetString("Crocodile_TimesUp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на End the game.
+        /// </summary>
+        internal static string EndGameButton {
+            get {
+                return ResourceManager.GetString("EndGameButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на ⚠️ Unable to check the game&apos;s status. Please try again later..
+        /// </summary>
+        internal static string Error_CrocodileState {
+            get {
+                return ResourceManager.GetString("Error_CrocodileState", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на ⚠️ The game is already started in this chat..
+        /// </summary>
+        internal static string GameAlreadyStarted {
+            get {
+                return ResourceManager.GetString("GameAlreadyStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на guessed the word! The correct answer is:.
+        /// </summary>
+        internal static string GuessedWord {
+            get {
+                return ResourceManager.GetString("GuessedWord", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Host.
+        /// </summary>
+        internal static string HostIs {
+            get {
+                return ResourceManager.GetString("HostIs", resourceCulture);
             }
         }
         
@@ -124,11 +223,76 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Only the host can change the word!.
+        /// </summary>
+        internal static string OnlyHostChangeWord {
+            get {
+                return ResourceManager.GetString("OnlyHostChangeWord", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Only the host can end the game!.
+        /// </summary>
+        internal static string OnlyHostEndGame {
+            get {
+                return ResourceManager.GetString("OnlyHostEndGame", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Only the host can see the word.
+        /// </summary>
+        internal static string OnlyHostSeeWord {
+            get {
+                return ResourceManager.GetString("OnlyHostSeeWord", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Show word.
+        /// </summary>
+        internal static string ShowWordButton {
+            get {
+                return ResourceManager.GetString("ShowWordButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Flood protection.
         /// </summary>
         internal static string SpamProtectionButton {
             get {
                 return ResourceManager.GetString("SpamProtectionButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Let&apos;s play “Crocodile”! Host: .
+        /// </summary>
+        internal static string StartTheGamePart1 {
+            get {
+                return ResourceManager.GetString("StartTheGamePart1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Click the “Show Word” button
+        ///
+        ///Each round lasts *15* minutes.
+        /// </summary>
+        internal static string StartTheGamePart2 {
+            get {
+                return ResourceManager.GetString("StartTheGamePart2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на To start a new game, click:.
+        /// </summary>
+        internal static string ToStartNewGame {
+            get {
+                return ResourceManager.GetString("ToStartNewGame", resourceCulture);
             }
         }
         

@@ -148,4 +148,60 @@
     <value>Hello! Thanks for adding me.
 Please select a language for this chat</value>
   </data>
+  <data name="ShowWordButton" xml:space="preserve">
+    <value>Show word</value>
+  </data>
+  <data name="ChangeWordButton" xml:space="preserve">
+    <value>Change word</value>
+  </data>
+  <data name="EndGameButton" xml:space="preserve">
+    <value>End the game</value>
+  </data>
+  <data name="StartTheGamePart1" xml:space="preserve">
+    <value>Let's play “Crocodile”! Host: </value>
+  </data>
+  <data name="StartTheGamePart2" xml:space="preserve">
+    <value>Click the “Show Word” button
+
+Each round lasts *15* minutes</value>
+  </data>
+  <data name="GameAlreadyStarted" xml:space="preserve">
+    <value>⚠️ The game is already started in this chat.</value>
+  </data>
+  <data name="HostIs" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="Error_CrocodileState" xml:space="preserve">
+    <value>⚠️ Unable to check the game's status. Please try again later.</value>
+  </data>
+  <data name="GuessedWord" xml:space="preserve">
+    <value>guessed the word! The correct answer is:</value>
+  </data>
+  <data name="ToStartNewGame" xml:space="preserve">
+    <value>To start a new game, click:</value>
+  </data>
+  <data name="CallbackQuery_Word" xml:space="preserve">
+    <value>Word</value>
+  </data>
+  <data name="OnlyHostSeeWord" xml:space="preserve">
+    <value>Only the host can see the word</value>
+  </data>
+  <data name="CallbackQuery_NewWord" xml:space="preserve">
+    <value>New word</value>
+  </data>
+  <data name="CallbackQuery_CantChangeWord" xml:space="preserve">
+    <value>Unable to change the word.</value>
+  </data>
+  <data name="OnlyHostChangeWord" xml:space="preserve">
+    <value>Only the host can change the word!</value>
+  </data>
+  <data name="Crocodile_EndedGame" xml:space="preserve">
+    <value>has finished the game. To start a new one, type</value>
+  </data>
+  <data name="OnlyHostEndGame" xml:space="preserve">
+    <value>Only the host can end the game!</value>
+  </data>
+  <data name="Crocodile_TimesUp" xml:space="preserve">
+    <value>Time's up! To start a new game, send</value>
+  </data>
 </root>

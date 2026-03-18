@@ -148,4 +148,60 @@
     <value>Здравствуйте! Спасибо, что добавили меня.
 Пожалуйста, выберите язык для этого чата</value>
   </data>
+  <data name="ShowWordButton" xml:space="preserve">
+    <value>Показать слово</value>
+  </data>
+  <data name="ChangeWordButton" xml:space="preserve">
+    <value>Изменить слово</value>
+  </data>
+  <data name="EndGameButton" xml:space="preserve">
+    <value>Завершить игру</value>
+  </data>
+  <data name="StartTheGamePart1" xml:space="preserve">
+    <value>Игра «Крокодил» начата! Ведущий: </value>
+  </data>
+  <data name="StartTheGamePart2" xml:space="preserve">
+    <value>Нажми кнопку «Показать слово»
+
+На раунд даётся *15* минут</value>
+  </data>
+  <data name="GameAlreadyStarted" xml:space="preserve">
+    <value>⚠️ Игра уже идёт в этом чате.</value>
+  </data>
+  <data name="HostIs" xml:space="preserve">
+    <value>Ведущий</value>
+  </data>
+  <data name="Error_CrocodileState" xml:space="preserve">
+    <value>⚠️ Не смог узнать состояние игры. Попробуйте позже.</value>
+  </data>
+  <data name="GuessedWord" xml:space="preserve">
+    <value>угадал(а) слово! Правильный ответ:</value>
+  </data>
+  <data name="ToStartNewGame" xml:space="preserve">
+    <value>Чтобы начать новую игру, нажми:</value>
+  </data>
+  <data name="CallbackQuery_Word" xml:space="preserve">
+    <value>Слово</value>
+  </data>
+  <data name="OnlyHostSeeWord" xml:space="preserve">
+    <value>Только ведущий может видеть слово</value>
+  </data>
+  <data name="CallbackQuery_NewWord" xml:space="preserve">
+    <value>Новое слово</value>
+  </data>
+  <data name="CallbackQuery_CantChangeWord" xml:space="preserve">
+    <value>Не удалось сменить слово.</value>
+  </data>
+  <data name="OnlyHostChangeWord" xml:space="preserve">
+    <value>Только ведущий может сменить слово!</value>
+  </data>
+  <data name="Crocodile_EndedGame" xml:space="preserve">
+    <value>завершил(а) игру. Чтобы начать новую, напиши</value>
+  </data>
+  <data name="OnlyHostEndGame" xml:space="preserve">
+    <value>Только ведущий может завершить игру!</value>
+  </data>
+  <data name="Crocodile_TimesUp" xml:space="preserve">
+    <value>Время игры истекло! Чтобы начать новую — отправьте</value>
+  </data>
 </root>
