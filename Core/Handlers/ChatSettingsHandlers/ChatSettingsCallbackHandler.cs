@@ -73,7 +73,7 @@ namespace MyUpdatedBot.Core.Handlers.ChatSettingsHandlers
                     _logger.LogDebug(ex, "[SettingsCallbackHandler]: Failed to EditMessageReplyMarkup for chat {Chat}, data: {data}", chatId, data);
                 }
 
-                await botClient.AnswerCallbackQuery(callback.Id, $"{_loc.GetString(updated, "ChatSettings_LinksAllowedButton")} {(updated.LinksAllowed ? "✅" : "❌")}", cancellationToken: ct);
+                await botClient.AnswerCallbackQuery(callback.Id, $"{_loc.GetString(updated, "LinksAllowedButton")} {(updated.LinksAllowed ? "✅" : "❌")}", cancellationToken: ct);
                 return;
             }
 
@@ -92,7 +92,7 @@ namespace MyUpdatedBot.Core.Handlers.ChatSettingsHandlers
                     _logger.LogDebug(ex, "[SettingsCallbackHandler]: Failed to EditMessageReplyMarkup for chat {Chat}, data: {data}", chatId, data);
                 }
 
-                await botClient.AnswerCallbackQuery(callback.Id, $"{_loc.GetString(updated, "ChatSettings_SpamProtectionButton")} {(updated.SpamProtectionEnabled ? "✅" : "❌")}", cancellationToken: ct);
+                await botClient.AnswerCallbackQuery(callback.Id, $"{_loc.GetString(updated, "SpamProtectionButton")} {(updated.SpamProtectionEnabled ? "✅" : "❌")}", cancellationToken: ct);
                 return;
             }
 
