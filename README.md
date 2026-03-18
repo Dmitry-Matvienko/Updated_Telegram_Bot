@@ -20,6 +20,7 @@
 - **Link detection** searching for and removing links in messages
 - **Chat settings** allow to switch settings for each chat
 - **Summon users** allows you to tag the most active users(80 by default) in batches(20 per message)
+- **Localization** into 3 languages(en,ru,uk - ukranian)
 
 ## Project structure
 
@@ -28,7 +29,9 @@
 / Core          # basic models, interfaces, handlers
   / Handlers    # Handlers and interfaces to them for bot commands
   / Models      # EF Core entities and DTOs
-/ Infrastructure # hosting, BotHostedService, Data (MyDbContext)
+  / Localization# a utility class for correctly displaying translations
+/ Infrastructure# hosting, BotHostedService, Data (MyDbContext)
+/ Resources		# .resx files with translations
 / Services      # different services for processing commands, including background services
 Program.cs      # Main point, host configuration
 appsettings.json# project configuration
@@ -116,6 +119,7 @@ Migrations/     # EF Core migrations
 - **EF Core**: `MyDbContext` with `DbSet<UserEntity>`, `MessageStats`, `RatingStats`.
 - **Serilog**: configured via `appsettings.json` + `UseSerilog(...).ReadFrom.Configuration(..., reloadOnChange:true)`.
 - **Clenup**: a background custom timer that periodically runs registered cleanup tasks
+- **Localization**: using utility class and .resx files for translations
 
 ## Logging
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using MyUpdatedBot.Core.Localization;
 using MyUpdatedBot.Services.CrocodileGame;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -10,11 +11,13 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
     {
         private readonly ICrocodileService _games;
         private readonly ILogger<CrocodileGuessHandler> _logger;
+        private readonly LocalizationUtil _loc;
 
-        public CrocodileGuessHandler(ICrocodileService games, ILogger<CrocodileGuessHandler> logger)
+        public CrocodileGuessHandler(ICrocodileService games, ILogger<CrocodileGuessHandler> logger, LocalizationUtil loc)
         {
             _games = games;
             _logger = logger;
+            _loc = loc;
         }
         public bool CanHandle(Message? message)
         {
@@ -48,8 +51,8 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
 
                     await botClient.SendMessage(
                         chatId: chatId,
-                        text: $"🎉 {winnerMention} угадал(а) слово! Правильный ответ: *{state?.CurrentWord ?? "—"}*\n\n" +
-                              $"Чтобы начать новую игру, нажми: /crocodile",
+                        text: $"🎉 {winnerMention} {await _loc.GetStringAsync(chatId, message, "GuessedWord")} *{state?.CurrentWord ?? "—"}*\n\n" +
+                              $"{await _loc.GetStringAsync(chatId, message, "ToStartNewGame")} /crocodile",
                         parseMode: ParseMode.Markdown,
                         cancellationToken: ct);
 

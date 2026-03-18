@@ -1,4 +1,5 @@
-﻿using MyUpdatedBot.Services.CrocodileGame;
+﻿using MyUpdatedBot.Core.Localization;
+using MyUpdatedBot.Services.CrocodileGame;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -8,8 +9,13 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
     public class CrocodileCallbackHandler : IButtonHandlers
     {
         private readonly ICrocodileService _games;
+        private readonly LocalizationUtil _loc;
 
-        public CrocodileCallbackHandler(ICrocodileService games) => _games = games;
+        public CrocodileCallbackHandler(ICrocodileService games, LocalizationUtil loc)
+        {
+            _games = games;
+            _loc = loc;
+        }
         public bool CanHandle(CallbackQuery callback)
         {
             // process buttons if there is an active game in this chat
@@ -32,7 +38,7 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
             {
                 
                 case "show_word" when isHost:
-                    response = $"🔎 Слово: {state.CurrentWord}";
+                    response = $"🔎 {await _loc.GetStringAsync(chatId, callback.Message, "CallbackQuery_Word")}: {state.CurrentWord}";
                     await botClient.AnswerCallbackQuery(
                         callback.Id,
                         response,
@@ -41,7 +47,7 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
                     return;
 
                 case "show_word":
-                    response = "⚠️ Только ведущий может видеть слово!";
+                    response = $"⚠️ {await _loc.GetStringAsync(chatId, callback.Message, "OnlyHostSeeWord")}";
                     await botClient.AnswerCallbackQuery(
                         callback.Id,
                         response,
@@ -51,9 +57,9 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
 
                 case "change_word" when isHost:
                     if (_games.TryChangeWord(chatId, out var newWord))
-                        response = $"🔄 Новое слово: {newWord}";
+                        response = $"🔄 {await _loc.GetStringAsync(chatId, callback.Message, "CallbackQuery_NewWord")}: {newWord}";
                     else
-                        response = "❌ Не удалось сменить слово.";
+                        response = $"❌ {await _loc.GetStringAsync(chatId, callback.Message, "CallbackQuery_CantChangeWord")}";
                     await botClient.AnswerCallbackQuery(
                         callback.Id,
                         response,
@@ -62,7 +68,7 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
                     return;
 
                 case "change_word":
-                    response = "⚠️ Только ведущий может сменить слово!";
+                    response = $"⚠️ {await _loc.GetStringAsync(chatId, callback.Message, "OnlyHostChangeWord")}";
                     await botClient.AnswerCallbackQuery(
                         callback.Id,
                         response,
@@ -74,13 +80,13 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
                     _games.EndGame(chatId);
                     await botClient.SendMessage(
                         chatId: chatId,
-                        text: $"🛑 [{callback.From.FirstName}](tg://user?id={callback.From.Id}) завершил(а) игру. Чтобы начать новую, напиши /crocodile.",
+                        text: $"🛑 [{callback.From.FirstName}](tg://user?id={callback.From.Id}) {await _loc.GetStringAsync(chatId, callback.Message, "Crocodile_EndedGame")} /crocodile.",
                         parseMode: ParseMode.Markdown,
                         cancellationToken: ct);
                     return;
 
                 case "end_game":
-                    response = "⚠️ Только ведущий может завершить игру!";
+                    response = $"⚠️ {await _loc.GetStringAsync(chatId, callback.Message, "OnlyHostEndGame")}";
                     await botClient.AnswerCallbackQuery(
                         callback.Id,
                         response,

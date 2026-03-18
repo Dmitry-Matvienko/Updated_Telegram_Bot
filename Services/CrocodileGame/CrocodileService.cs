@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using MyUpdatedBot.Core.Localization;
 using MyUpdatedBot.Core.Models;
 using System.Collections.Concurrent;
 using Telegram.Bot;
@@ -12,12 +13,14 @@ namespace MyUpdatedBot.Services.CrocodileGame
         private readonly WordRepository _repo;
         private readonly ITelegramBotClient _botClient;
         private readonly ILogger<CrocodileService> _logger;
+        private readonly LocalizationUtil _loc;
 
-        public CrocodileService(WordRepository repo, ITelegramBotClient botClient, ILogger<CrocodileService> logger)
+        public CrocodileService(WordRepository repo, ITelegramBotClient botClient, ILogger<CrocodileService> logger, LocalizationUtil loc)
         {
             _repo = repo;
             _botClient = botClient;
             _logger = logger;
+            _loc = loc;
         }
 
         public bool TryStartGame(long chatId, long userId, out string word)
@@ -40,7 +43,7 @@ namespace MyUpdatedBot.Services.CrocodileGame
                 {
                     await _botClient.SendMessage(
                         chatId: cid,
-                        text: "⏰ Время игры истекло! Чтобы начать новую — отправьте /crocodile",
+                        text: $"⏰ {await _loc.GetStringAsync(chatId, null, "Crocodile_TimesUp")} /crocodile",
                         parseMode: ParseMode.Markdown);
                 }
                 catch (Exception ex)

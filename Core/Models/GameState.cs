@@ -17,7 +17,7 @@
             HostUserId = hostUserId;
             CurrentWord = word;
             _onTimeoutAsync = onTimeout;
-            _timeout = timeout ?? TimeSpan.FromMinutes(1);
+            _timeout = timeout ?? TimeSpan.FromMinutes(15);
             ResetTimeout();
         }
 

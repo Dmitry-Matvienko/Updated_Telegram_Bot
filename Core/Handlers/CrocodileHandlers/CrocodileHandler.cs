@@ -1,4 +1,5 @@
-﻿using MyUpdatedBot.Services.CrocodileGame;
+﻿using MyUpdatedBot.Core.Localization;
+using MyUpdatedBot.Services.CrocodileGame;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -9,8 +10,13 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
     public class CrocodileHandler : IMessageHandler
     {
         private readonly ICrocodileService _games;
+        private readonly LocalizationUtil _loc;
 
-        public CrocodileHandler(ICrocodileService games) => _games = games;
+        public CrocodileHandler(ICrocodileService games, LocalizationUtil loc)
+        {
+            _games = games;
+            _loc = loc;
+        }
         public bool CanHandle(Message? message)
         {
             if (message?.From == null || message.Chat == null || message.From.IsBot) return false;
@@ -27,16 +33,15 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
 
             var inlineKeyboard = new InlineKeyboardMarkup(new[]
                {
-                    new[]{InlineKeyboardButton.WithCallbackData("Показать слово", "show_word") },
-                    new[]{InlineKeyboardButton.WithCallbackData("Изменить слово", "change_word") },
-                    new[]{InlineKeyboardButton.WithCallbackData("Завершить игру", "end_game") },
+                    new[]{InlineKeyboardButton.WithCallbackData($"{await _loc.GetStringAsync(chatId, message, "ShowWordButton")}", "show_word") },
+                    new[]{InlineKeyboardButton.WithCallbackData($"{await _loc.GetStringAsync(chatId, message, "ChangeWordButton")}", "change_word") },
+                    new[]{InlineKeyboardButton.WithCallbackData($"{await _loc.GetStringAsync(chatId, message, "EndGameButton")}", "end_game") },
                 });
             if (_games.TryStartGame(chatId, userId, out var word))
             {
                 await botClient.SendMessage(chatId,
-                    $"Игра «Крокодил» начата! Ведущий: [{message.From.FirstName}](tg://user?id={message.From.Id})\n" +
-                    $"Нажми кнопку «Показать слово»\n\n" +
-                    $"На раунд даётся *15* минут",
+                    $"{await _loc.GetStringAsync(chatId, message, "StartTheGamePart1")}[{message.From.FirstName}](tg://user?id={message.From.Id})\n" +
+                    $"{await _loc.GetStringAsync(chatId, message, "StartTheGamePart2")}",
                     parseMode: ParseMode.Markdown,
                     replyMarkup: inlineKeyboard,
                     cancellationToken: ct);
@@ -49,8 +54,8 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
                     await botClient.SendMessage(
                         chatId: chatId,
                         text:
-                          $"⚠️ Игра уже идёт в этом чате.\n" +
-                          $"[Ведущий игры](tg://user?id={state.HostUserId})",
+                          $"{await _loc.GetStringAsync(chatId, message, "GameAlreadyStarted")}\n" +
+                          $"[{await _loc.GetStringAsync(chatId, message, "HostIs")}](tg://user?id={state.HostUserId})",
                         parseMode: ParseMode.Markdown,
                         replyMarkup: inlineKeyboard,
                         cancellationToken: ct);
@@ -60,7 +65,7 @@ namespace MyUpdatedBot.Core.Handlers.CrocodileHandlers
                     // if an unpredictable error occurs
                     await botClient.SendMessage(
                         chatId: chatId,
-                        text: "⚠️ Не смог узнать состояние игры. Попробуйте позже.",
+                        text: $"{await _loc.GetStringAsync(chatId, message, "Error_CrocodileState")}",
                         cancellationToken: ct);
                 }
             }
