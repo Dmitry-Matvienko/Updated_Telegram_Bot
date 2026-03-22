@@ -5,16 +5,19 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using MyUpdatedBot.Cache.ReportsStore;
+using MyUpdatedBot.Core.Localization;
 
 public class UserReportHandler : IMessageHandler
 {
     private readonly ILogger<UserReportHandler> _logger;
     private readonly IUserReportsThrottleStore _throttle;
+    private readonly LocalizationUtil _loc;
 
-    public UserReportHandler(ILogger<UserReportHandler> logger, IUserReportsThrottleStore throttle)
+    public UserReportHandler(ILogger<UserReportHandler> logger, IUserReportsThrottleStore throttle, LocalizationUtil loc)
     {
         _logger = logger;
         _throttle = throttle;
+        _loc = loc;
     }
 
     public bool CanHandle(Message? message)
@@ -24,29 +27,28 @@ public class UserReportHandler : IMessageHandler
         if (string.IsNullOrWhiteSpace(message.Text)) return false;
 
         return message.Text.Equals("!админ", StringComparison.OrdinalIgnoreCase)
+            || message.Text.Equals("!адмін", StringComparison.OrdinalIgnoreCase)
             || message.Text.Equals("!report", StringComparison.OrdinalIgnoreCase);
     }
 
     public async Task HandleAsync(ITelegramBotClient botClient, Message message, CancellationToken ct)
     {
-        
+        var chatId = message.Chat.Id;
+
         if (message.ReplyToMessage is null)
         {
-            await botClient.SendMessage(message.Chat.Id,
-                "Нужно писать эту команду на сообщение, которое нарушет правила чата",
+            await botClient.SendMessage(chatId, await _loc.GetStringAsync(chatId, message, "NeedMessageForReport"),
                 cancellationToken: ct);
             return;
         }
 
-        var chatId = message.Chat.Id;
         var reporterId = message.From!.Id;
         var target = message.ReplyToMessage.From;
         if (target == null) return;
 
         if (reporterId == target.Id)
         {
-            await botClient.SendMessage(chatId,
-                "Нельзя пожаловаться на самого себя",
+            await botClient.SendMessage(chatId, await _loc.GetStringAsync(chatId, message, "CantComplYourself"),
                 replyParameters: message.MessageId,
                 cancellationToken: ct);
             return;
@@ -57,7 +59,7 @@ public class UserReportHandler : IMessageHandler
         if (!_throttle.TryCheckAndSet(key, out var waitSeconds))
         {
             await botClient.SendMessage(chatId,
-                $"Подожди {waitSeconds} сек. прежде чем отправлять следующую жалобу",
+                $"{waitSeconds} {await _loc.GetStringAsync(chatId, message, "TimeLeftForNextCompl")}",
                 replyParameters: message.MessageId,
                 cancellationToken: ct);
             return;
@@ -72,8 +74,8 @@ public class UserReportHandler : IMessageHandler
         catch (Exception ex)
         {
             _logger.LogError(ex, "[ReportHandler]: Unable to obtain chat administrators {ChatId}", chatId);
-            await botClient.SendMessage(chatId,
-                "Не могу получить список администраторов. Попробуйте позже.",
+
+            await botClient.SendMessage(chatId, await _loc.GetStringAsync(chatId, message, "CantGetAdminsList"),
                 replyParameters: message.MessageId,
                 cancellationToken: ct);
             return;
@@ -83,19 +85,18 @@ public class UserReportHandler : IMessageHandler
         {
             new []
             {
-                InlineKeyboardButton.WithCallbackData("🔇 Мут 30 мин", $"compl:{chatId}:{message.ReplyToMessage.MessageId}:{target.Id}:mute30"),
-                InlineKeyboardButton.WithCallbackData("⛔ Бан", $"compl:{chatId}:{message.ReplyToMessage.MessageId}:{target.Id}:ban")
+                InlineKeyboardButton.WithCallbackData(await _loc.GetStringAsync(chatId, message, "MuteButton"), $"compl:{chatId}:{message.ReplyToMessage.MessageId}:{target.Id}:mute30"),
+                InlineKeyboardButton.WithCallbackData(await _loc.GetStringAsync(chatId, message, "BanButton"), $"compl:{chatId}:{message.ReplyToMessage.MessageId}:{target.Id}:ban")
             },
             new []
             {
-                InlineKeyboardButton.WithCallbackData("➖ Игнор", $"compl:{chatId}:{message.ReplyToMessage.MessageId}:{target.Id}:ignore")
+                InlineKeyboardButton.WithCallbackData(await _loc.GetStringAsync(chatId, message, "IgnoreButton"), $"compl:{chatId}:{message.ReplyToMessage.MessageId}:{target.Id}:ignore")
             }
         });
 
-        var notifyText = $"⚠️ Жалоба в чате {(message.Chat.Title ?? message.Chat.Id.ToString())}\n" +
-                         $"Жалоба от: [{(message.From.FirstName ?? message.From.Username ?? message.From.Id.ToString())}](tg://user?id={reporterId})\n" +
-                         $"На: [{(target.FirstName ?? target.Username ?? target.Id.ToString())}](tg://user?id={target.Id})\n" +
-                         $"(переслано ниже)";
+        var notifyText = $"{await _loc.GetStringAsync(chatId, message, "ComplaintIn")} {(message.Chat.Title ?? message.Chat.Id.ToString())}\n" +
+                         $"{await _loc.GetStringAsync(chatId, message, "ComplaintFrom")} [{(message.From.FirstName ?? message.From.Username ?? message.From.Id.ToString())}](tg://user?id={reporterId})\n" +
+                         $"{await _loc.GetStringAsync(chatId, message, "ComplaintAgainst")} [{(target.FirstName ?? target.Username ?? target.Id.ToString())}](tg://user?id={target.Id})\n";
 
         foreach (var admin in admins)
         {
@@ -125,6 +126,6 @@ public class UserReportHandler : IMessageHandler
         }
 
         try { await botClient.DeleteMessage(chatId, messageId: message.MessageId, cancellationToken: ct); }catch {}
-        await botClient.SendMessage(chatId,"Жалоба отправлена администраторам. Спасибо.",cancellationToken: ct);
+        await botClient.SendMessage(chatId, await _loc.GetStringAsync(chatId, message, "ComplaintSent"), cancellationToken: ct);
     }
 }
