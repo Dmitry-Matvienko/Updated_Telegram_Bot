@@ -204,4 +204,80 @@ Each round lasts *15* minutes</value>
   <data name="Crocodile_TimesUp" xml:space="preserve">
     <value>Time's up! To start a new game, send</value>
   </data>
+  <data name="NeedMessageForReport" xml:space="preserve">
+    <value>You need to type this command in response to a message that violates the chat rules</value>
+  </data>
+  <data name="CantComplYourself" xml:space="preserve">
+    <value>You can't complain about yourself</value>
+  </data>
+  <data name="TimeLeftForNextCompl" xml:space="preserve">
+    <value>seconds left before submitting the next complaint</value>
+  </data>
+  <data name="CantGetAdminsList" xml:space="preserve">
+    <value>Couldn't get the list of administrators. Please try again later.</value>
+  </data>
+  <data name="MuteButton" xml:space="preserve">
+    <value>🔇 Mute 30 mins</value>
+  </data>
+  <data name="BanButton" xml:space="preserve">
+    <value>⛔ Ban</value>
+  </data>
+  <data name="IgnoreButton" xml:space="preserve">
+    <value>➖ Ignore</value>
+  </data>
+  <data name="ComplaintIn" xml:space="preserve">
+    <value>⚠️ Complaint in the chat:</value>
+  </data>
+  <data name="ComplaintFrom" xml:space="preserve">
+    <value>Complaint from:</value>
+  </data>
+  <data name="ComplaintAgainst" xml:space="preserve">
+    <value>Complaint against:</value>
+  </data>
+  <data name="ComplaintSent" xml:space="preserve">
+    <value>The complaint has been sent to the administrators. Thank you.</value>
+  </data>
+  <data name="WrongData" xml:space="preserve">
+    <value>Incorrect data</value>
+  </data>
+  <data name="NotAdmin" xml:space="preserve">
+    <value>You are not an administrator of this chat.</value>
+  </data>
+  <data name="CantCheckRights" xml:space="preserve">
+    <value>Unable to verify your permissions</value>
+  </data>
+  <data name="ComplaintProcessed" xml:space="preserve">
+    <value>The complaint has already been processed by admin</value>
+  </data>
+  <data name="ComplaintIgnored" xml:space="preserve">
+    <value>The complaint was ignored</value>
+  </data>
+  <data name="UserMuted" xml:space="preserve">
+    <value>The user has been muted for 30 minutes</value>
+  </data>
+  <data name="UserMutedByAdmin" xml:space="preserve">
+    <value>was muted for 30 minutes (by the administrator's decision).</value>
+  </data>
+  <data name="BotCouldntMuteUser" xml:space="preserve">
+    <value>Failed to mute the user. Check the bot's permissions.</value>
+  </data>
+  <data name="UserBanned" xml:space="preserve">
+    <value>The user has been banned.</value>
+  </data>
+  <data name="UserBannedByAdmin" xml:space="preserve">
+    <value>has been blocked (by the administrator).</value>
+  </data>
+  <data name="BotCouldntBanUser" xml:space="preserve">
+    <value>Failed to ban the user. Please check the bot's permissions.</value>
+  </data>
+  <data name="ErrorOccured" xml:space="preserve">
+    <value>An error occurred during processing. Please try again.</value>
+  </data>
+  <data name="ProcessedByAdmin" xml:space="preserve">
+    <value>Processed by the admin</value>
+  </data>
+  <data name="ChosenAction" xml:space="preserve">
+    <value>minutes ago
+Selected action:</value>
+  </data>
 </root>

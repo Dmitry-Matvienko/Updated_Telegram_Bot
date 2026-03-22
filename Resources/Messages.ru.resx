@@ -204,4 +204,80 @@
   <data name="Crocodile_TimesUp" xml:space="preserve">
     <value>Время игры истекло! Чтобы начать новую — отправьте</value>
   </data>
+  <data name="NeedMessageForReport" xml:space="preserve">
+    <value>Нужно писать эту команду на сообщение, которое нарушет правила чата</value>
+  </data>
+  <data name="CantComplYourself" xml:space="preserve">
+    <value>Нельзя пожаловаться на самого себя</value>
+  </data>
+  <data name="TimeLeftForNextCompl" xml:space="preserve">
+    <value>сек. осталось прежде чем отправлять следующую жалобу</value>
+  </data>
+  <data name="CantGetAdminsList" xml:space="preserve">
+    <value>Не смог получить список администраторов. Попробуйте позже.</value>
+  </data>
+  <data name="MuteButton" xml:space="preserve">
+    <value>🔇 Мут 30 мин</value>
+  </data>
+  <data name="BanButton" xml:space="preserve">
+    <value>⛔ Бан</value>
+  </data>
+  <data name="IgnoreButton" xml:space="preserve">
+    <value>➖ Игнор</value>
+  </data>
+  <data name="ComplaintIn" xml:space="preserve">
+    <value>⚠️ Жалоба в чате:</value>
+  </data>
+  <data name="ComplaintFrom" xml:space="preserve">
+    <value>Жалоба от:</value>
+  </data>
+  <data name="ComplaintAgainst" xml:space="preserve">
+    <value>Жалоба на:</value>
+  </data>
+  <data name="ComplaintSent" xml:space="preserve">
+    <value>Жалоба отправлена администраторам. Спасибо.</value>
+  </data>
+  <data name="WrongData" xml:space="preserve">
+    <value>Неправильные данные</value>
+  </data>
+  <data name="NotAdmin" xml:space="preserve">
+    <value>Вы не администратор этого чата.</value>
+  </data>
+  <data name="CantCheckRights" xml:space="preserve">
+    <value>Не удалось проверить ваши права</value>
+  </data>
+  <data name="ComplaintProcessed" xml:space="preserve">
+    <value>Жалоба уже обработана админом</value>
+  </data>
+  <data name="ComplaintIgnored" xml:space="preserve">
+    <value>Жалоба проигнорирована</value>
+  </data>
+  <data name="UserMuted" xml:space="preserve">
+    <value>Пользователь заглушён на 30 минут</value>
+  </data>
+  <data name="UserMutedByAdmin" xml:space="preserve">
+    <value>был заглушён на 30 минут (по решению администратора).</value>
+  </data>
+  <data name="BotCouldntMuteUser" xml:space="preserve">
+    <value>Не удалось заглушить пользователя. Проверьте права бота.</value>
+  </data>
+  <data name="UserBanned" xml:space="preserve">
+    <value>Пользователь забанен.</value>
+  </data>
+  <data name="UserBannedByAdmin" xml:space="preserve">
+    <value>заблокирован (по решению администратора).</value>
+  </data>
+  <data name="BotCouldntBanUser" xml:space="preserve">
+    <value>Не удалось забанить пользователя. Проверьте права бота.</value>
+  </data>
+  <data name="ErrorOccured" xml:space="preserve">
+    <value>Ошибка при обработке. Попробуйте снова. </value>
+  </data>
+  <data name="ProcessedByAdmin" xml:space="preserve">
+    <value>Обработано админом</value>
+  </data>
+  <data name="ChosenAction" xml:space="preserve">
+    <value>минут назад
+Выбранное действие:</value>
+  </data>
 </root>

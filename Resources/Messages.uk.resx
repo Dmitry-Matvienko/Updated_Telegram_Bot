@@ -204,4 +204,80 @@
   <data name="Crocodile_TimesUp" xml:space="preserve">
     <value>Час гри вийшов! Щоб розпочати нову — надішліть</value>
   </data>
+  <data name="NeedMessageForReport" xml:space="preserve">
+    <value>Потрібно писати цю команду на повідомлення, яке порушує правила чату</value>
+  </data>
+  <data name="CantComplYourself" xml:space="preserve">
+    <value>Не можна поскаржитися на самого себе</value>
+  </data>
+  <data name="TimeLeftForNextCompl" xml:space="preserve">
+    <value>сек. залишилося перш ніж надсилати наступну скаргу</value>
+  </data>
+  <data name="CantGetAdminsList" xml:space="preserve">
+    <value>Не зміг отримати список адміністраторів. Спробуйте пізніше.</value>
+  </data>
+  <data name="MuteButton" xml:space="preserve">
+    <value>🔇 Мут 30 хв</value>
+  </data>
+  <data name="BanButton" xml:space="preserve">
+    <value>⛔ Бан</value>
+  </data>
+  <data name="IgnoreButton" xml:space="preserve">
+    <value>➖ Ігнор</value>
+  </data>
+  <data name="ComplaintIn" xml:space="preserve">
+    <value>⚠️ Скарга в чаті:</value>
+  </data>
+  <data name="ComplaintFrom" xml:space="preserve">
+    <value>Скарга від:</value>
+  </data>
+  <data name="ComplaintAgainst" xml:space="preserve">
+    <value>Скарга на:</value>
+  </data>
+  <data name="ComplaintSent" xml:space="preserve">
+    <value>Скаргу надіслано адміністраторам. Дякую.</value>
+  </data>
+  <data name="WrongData" xml:space="preserve">
+    <value>Неправильні дані</value>
+  </data>
+  <data name="NotAdmin" xml:space="preserve">
+    <value>Ви не є адміністратором цього чату.</value>
+  </data>
+  <data name="CantCheckRights" xml:space="preserve">
+    <value>Не вдалося перевірити ваші права</value>
+  </data>
+  <data name="ComplaintProcessed" xml:space="preserve">
+    <value>Скарга вже опрацьована адміном</value>
+  </data>
+  <data name="ComplaintIgnored" xml:space="preserve">
+    <value>Скарга проігнорована</value>
+  </data>
+  <data name="UserMuted" xml:space="preserve">
+    <value>Користувач заглушений на 30 хвилин</value>
+  </data>
+  <data name="UserMutedByAdmin" xml:space="preserve">
+    <value>був заглушений на 30 хвилин (за рішенням адміністратора).</value>
+  </data>
+  <data name="BotCouldntMuteUser" xml:space="preserve">
+    <value>Не вдалося заглушити користувача. Перевірте права бота.</value>
+  </data>
+  <data name="UserBanned" xml:space="preserve">
+    <value>Користувач заблокован.</value>
+  </data>
+  <data name="UserBannedByAdmin" xml:space="preserve">
+    <value>заблокован (за рішенням адміністратора).</value>
+  </data>
+  <data name="BotCouldntBanUser" xml:space="preserve">
+    <value>Не вдалося забанити користувача. Перевірте права бота.</value>
+  </data>
+  <data name="ErrorOccured" xml:space="preserve">
+    <value>Помилка під час обробки. Спробуйте ще раз.</value>
+  </data>
+  <data name="ProcessedByAdmin" xml:space="preserve">
+    <value>Опрацьовано адміном</value>
+  </data>
+  <data name="ChosenAction" xml:space="preserve">
+    <value>хвилин тому
+Вибрана дія:</value>
+  </data>
 </root>

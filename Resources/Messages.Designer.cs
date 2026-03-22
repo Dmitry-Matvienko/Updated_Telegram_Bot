@@ -70,6 +70,33 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на ⛔ Ban.
+        /// </summary>
+        internal static string BanButton {
+            get {
+                return ResourceManager.GetString("BanButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Failed to ban the user. Please check the bot&apos;s permissions..
+        /// </summary>
+        internal static string BotCouldntBanUser {
+            get {
+                return ResourceManager.GetString("BotCouldntBanUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Failed to mute the user. Check the bot&apos;s permissions..
+        /// </summary>
+        internal static string BotCouldntMuteUser {
+            get {
+                return ResourceManager.GetString("BotCouldntMuteUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Unable to change the word..
         /// </summary>
         internal static string CallbackQuery_CantChangeWord {
@@ -97,6 +124,33 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Unable to verify your permissions.
+        /// </summary>
+        internal static string CantCheckRights {
+            get {
+                return ResourceManager.GetString("CantCheckRights", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на You can&apos;t complain about yourself.
+        /// </summary>
+        internal static string CantComplYourself {
+            get {
+                return ResourceManager.GetString("CantComplYourself", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Couldn&apos;t get the list of administrators. Please try again later..
+        /// </summary>
+        internal static string CantGetAdminsList {
+            get {
+                return ResourceManager.GetString("CantGetAdminsList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Change word.
         /// </summary>
         internal static string ChangeWordButton {
@@ -115,11 +169,75 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на minutes ago
+        ///Selected action:.
+        /// </summary>
+        internal static string ChosenAction {
+            get {
+                return ResourceManager.GetString("ChosenAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Your language is English 🇬🇧.
         /// </summary>
         internal static string ChosenLanguage {
             get {
                 return ResourceManager.GetString("ChosenLanguage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Complaint against:.
+        /// </summary>
+        internal static string ComplaintAgainst {
+            get {
+                return ResourceManager.GetString("ComplaintAgainst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Complaint from:.
+        /// </summary>
+        internal static string ComplaintFrom {
+            get {
+                return ResourceManager.GetString("ComplaintFrom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на The complaint was ignored.
+        /// </summary>
+        internal static string ComplaintIgnored {
+            get {
+                return ResourceManager.GetString("ComplaintIgnored", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на ⚠️ Complaint in the chat:.
+        /// </summary>
+        internal static string ComplaintIn {
+            get {
+                return ResourceManager.GetString("ComplaintIn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на The complaint has already been processed by admin.
+        /// </summary>
+        internal static string ComplaintProcessed {
+            get {
+                return ResourceManager.GetString("ComplaintProcessed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на The complaint has been sent to the administrators. Thank you..
+        /// </summary>
+        internal static string ComplaintSent {
+            get {
+                return ResourceManager.GetString("ComplaintSent", resourceCulture);
             }
         }
         
@@ -160,6 +278,15 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на An error occurred during processing. Please try again..
+        /// </summary>
+        internal static string ErrorOccured {
+            get {
+                return ResourceManager.GetString("ErrorOccured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на ⚠️ The game is already started in this chat..
         /// </summary>
         internal static string GameAlreadyStarted {
@@ -187,6 +314,15 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на ➖ Ignore.
+        /// </summary>
+        internal static string IgnoreButton {
+            get {
+                return ResourceManager.GetString("IgnoreButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Language is.
         /// </summary>
         internal static string LanguageButton {
@@ -210,6 +346,33 @@ namespace MyUpdatedBot.Resources {
         internal static string MessageAfterChooseLang {
             get {
                 return ResourceManager.GetString("MessageAfterChooseLang", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на 🔇 Mute 30 mins.
+        /// </summary>
+        internal static string MuteButton {
+            get {
+                return ResourceManager.GetString("MuteButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на You need to type this command in response to a message that violates the chat rules.
+        /// </summary>
+        internal static string NeedMessageForReport {
+            get {
+                return ResourceManager.GetString("NeedMessageForReport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на You are not an administrator of this chat..
+        /// </summary>
+        internal static string NotAdmin {
+            get {
+                return ResourceManager.GetString("NotAdmin", resourceCulture);
             }
         }
         
@@ -246,6 +409,15 @@ namespace MyUpdatedBot.Resources {
         internal static string OnlyHostSeeWord {
             get {
                 return ResourceManager.GetString("OnlyHostSeeWord", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Processed by the admin.
+        /// </summary>
+        internal static string ProcessedByAdmin {
+            get {
+                return ResourceManager.GetString("ProcessedByAdmin", resourceCulture);
             }
         }
         
@@ -288,6 +460,15 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на seconds left before submitting the next complaint.
+        /// </summary>
+        internal static string TimeLeftForNextCompl {
+            get {
+                return ResourceManager.GetString("TimeLeftForNextCompl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на To start a new game, click:.
         /// </summary>
         internal static string ToStartNewGame {
@@ -306,12 +487,57 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на The user has been banned..
+        /// </summary>
+        internal static string UserBanned {
+            get {
+                return ResourceManager.GetString("UserBanned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на has been blocked (by the administrator)..
+        /// </summary>
+        internal static string UserBannedByAdmin {
+            get {
+                return ResourceManager.GetString("UserBannedByAdmin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на The user has been muted for 30 minutes.
+        /// </summary>
+        internal static string UserMuted {
+            get {
+                return ResourceManager.GetString("UserMuted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на was muted for 30 minutes (by the administrator&apos;s decision)..
+        /// </summary>
+        internal static string UserMutedByAdmin {
+            get {
+                return ResourceManager.GetString("UserMutedByAdmin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Hello! Thanks for adding me.
         ///Please select a language for this chat.
         /// </summary>
         internal static string Welcome_Title {
             get {
                 return ResourceManager.GetString("Welcome_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Incorrect data.
+        /// </summary>
+        internal static string WrongData {
+            get {
+                return ResourceManager.GetString("WrongData", resourceCulture);
             }
         }
     }
