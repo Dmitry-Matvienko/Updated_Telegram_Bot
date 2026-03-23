@@ -1,4 +1,5 @@
-﻿using MyUpdatedBot.Core.Models;
+﻿using MyUpdatedBot.Core.Localization;
+using MyUpdatedBot.Core.Models;
 using MyUpdatedBot.Services.RollGame;
 using System.Text;
 using Telegram.Bot;
@@ -10,8 +11,13 @@ namespace MyUpdatedBot.Core.Handlers.RollGameHandlers
     public class RollGameCallbackHandler : IButtonHandlers
     {
         private readonly IRollService _rollService;
+        private readonly LocalizationUtil _loc;
 
-        public RollGameCallbackHandler(IRollService rollService) { _rollService = rollService; }
+        public RollGameCallbackHandler(IRollService rollService, LocalizationUtil loc)
+        { 
+            _rollService = rollService; 
+            _loc = loc;
+        }
 
         public bool CanHandle(CallbackQuery callback) => !string.IsNullOrEmpty(callback.Data)
         && (callback.Data.StartsWith("roll:") || callback.Data.StartsWith("stop:"));
@@ -19,11 +25,12 @@ namespace MyUpdatedBot.Core.Handlers.RollGameHandlers
         public async Task HandleAsync(ITelegramBotClient botClient, CallbackQuery callback, CancellationToken ct)
         {
             var data = callback.Data!;
+            var chatId = callback.Message!.Chat.Id;
             if (data.StartsWith("roll:"))
             {
                 if (!Guid.TryParseExact(data.Substring(5), "N", out var id))
                 {
-                    await botClient.AnswerCallbackQuery(callback.Id, "Некорректный идентификатор", cancellationToken: ct);
+                    await botClient.AnswerCallbackQuery(callback.Id, await _loc.GetStringAsync(chatId, callback.Message, "UnknownCommand"), cancellationToken: ct);
                     return;
                 }
 
@@ -31,18 +38,20 @@ namespace MyUpdatedBot.Core.Handlers.RollGameHandlers
 
                 if (!rollResult.Ok)
                 {
-                    await botClient.AnswerCallbackQuery(callback.Id, "Игра уже закончена", showAlert: true, cancellationToken: ct);
+                    await botClient.AnswerCallbackQuery(callback.Id, await _loc.GetStringAsync(chatId, callback.Message, "GameAlreadyEnded"), showAlert: true, cancellationToken: ct);
                     return;
                 }
 
-                await botClient.AnswerCallbackQuery(callback.Id, rollResult.FirstTime ? $"Твой бросок: {rollResult.Value}" : $"Ты уже бросал: {rollResult.Value}", showAlert: true, cancellationToken: ct);
+                await botClient.AnswerCallbackQuery(callback.Id, rollResult.FirstTime ? 
+                    $"{await _loc.GetStringAsync(chatId, callback.Message, "UserThrow")}: {rollResult.Value}" : 
+                    $"{await _loc.GetStringAsync(chatId, callback.Message, "AlreadyRolled")}: {rollResult.Value}", showAlert: true, cancellationToken: ct);
 
                 if (_rollService.TryGetEvent(id, out var state) && state.MessageId != 0)
                 {
                     await state.EditLock.WaitAsync(ct);
                     try
                     {
-                        var text = BuildLeaderBoardText(state, finished: false);
+                        var text = await BuildLeaderBoardTextAsync(state, finished: false, callback.Message);
                         await botClient.EditMessageText(state.ChatId, state.MessageId, text, ParseMode.Markdown, replyMarkup: callback.Message!.ReplyMarkup, cancellationToken: ct);
                     }
                     finally
@@ -55,37 +64,38 @@ namespace MyUpdatedBot.Core.Handlers.RollGameHandlers
             {
                 if (!Guid.TryParseExact(data.Substring(5), "N", out var id))
                 {
-                    await botClient.AnswerCallbackQuery(callback.Id, "Некорректный идентификатор", cancellationToken: ct);
+                    await botClient.AnswerCallbackQuery(callback.Id, await _loc.GetStringAsync(chatId, callback.Message, "UnknownCommand"), cancellationToken: ct);
                     return;
                 }
 
                 if (!_rollService.TryGetEvent(id, out var state))
                 {
-                    await botClient.AnswerCallbackQuery(callback.Id, "Игра уже закончена", showAlert: true, cancellationToken: ct);
+                    await botClient.AnswerCallbackQuery(callback.Id, await _loc.GetStringAsync(chatId, callback.Message, "GameAlreadyEnded"), showAlert: true, cancellationToken: ct);
                     return;
                 }
 
                 if (callback.From.Id != state.HostUserId)
                 {
-                    await botClient.AnswerCallbackQuery(callback.Id, "Только ведущий может остановить розыгрыш", showAlert: true, cancellationToken: ct);
+                    await botClient.AnswerCallbackQuery(callback.Id, await _loc.GetStringAsync(chatId, callback.Message, "OnlyHostEndGame"), showAlert: true, cancellationToken: ct);
                     return;
                 }
 
                 _rollService.StopEvent(id);
-                await botClient.AnswerCallbackQuery(callback.Id, "Розыгрыш остановлен", showAlert: true, cancellationToken: ct);
+                var EventStopped = await _loc.GetStringAsync(chatId, callback.Message, "EventStopped");
+                await botClient.AnswerCallbackQuery(callback.Id, EventStopped, showAlert: true, cancellationToken: ct);
 
-                var finalText = BuildLeaderBoardText(state, finished: true);
-                await botClient.EditMessageText(state.ChatId, state.MessageId, "🛑 Розыгрыш остановлен\n\n" + finalText, ParseMode.Markdown, replyMarkup: null, cancellationToken: ct);
+                var finalText = BuildLeaderBoardTextAsync(state, finished: true);
+                await botClient.EditMessageText(state.ChatId, state.MessageId, $"🛑 {EventStopped}\n\n" + finalText, ParseMode.Markdown, replyMarkup: null, cancellationToken: ct);
             }
         }
 
-        private string BuildLeaderBoardText(RollGameState state, bool finished)
+        private async Task<string> BuildLeaderBoardTextAsync(RollGameState state, bool finished, Message? message = null)
         {
             var sb = new StringBuilder();
 
             if (!state.Results.Any())
             {
-                sb.AppendLine("_Пока нет участников_");
+                sb.AppendLine(await _loc.GetStringAsync(state.ChatId, message, "NoParticipantsYet"));
             }
             else
             {
@@ -94,7 +104,7 @@ namespace MyUpdatedBot.Core.Handlers.RollGameHandlers
                     .ThenBy(r => r.FirstName)
                     .ToList();
 
-                sb.AppendLine("Победители:");
+                sb.AppendLine(await _loc.GetStringAsync(state.ChatId, message, "WinnersEvent"));
 
                 var medals = new[] { "🥇", "🥈", "🥉" };
 
@@ -110,7 +120,7 @@ namespace MyUpdatedBot.Core.Handlers.RollGameHandlers
                 var rest = ordered.Skip(3).Take(7).ToList();
                 if (rest.Any())
                 {
-                    sb.AppendLine("\nОстальные участники:");
+                    sb.AppendLine($"\n{await _loc.GetStringAsync(state.ChatId, message, "OtherParticipants")}:");
                     foreach (var r in rest)
                     {
                         sb.AppendLine($"{rank}. [{r.FirstName}](tg://user?id={r.UserId}) — *{r.Value}*");
@@ -124,7 +134,9 @@ namespace MyUpdatedBot.Core.Handlers.RollGameHandlers
             var remaining = (int) (state.EndsAt - DateTime.UtcNow).TotalSeconds;
             if (remaining < 0) remaining = 0;
             var timeStr = TimeSpan.FromSeconds(remaining).ToString(@"mm\:ss");
-            sb.AppendLine(finished ? "Розыгрыш окончен!" : $"До конца: {timeStr}");
+            sb.AppendLine(finished ?
+                await _loc.GetStringAsync(state.ChatId, message, "GameAlreadyEnded") :
+                $"{await _loc.GetStringAsync(state.ChatId, message, "UntilTheEnd")}: {timeStr}");
 
             return sb.ToString();
         }
