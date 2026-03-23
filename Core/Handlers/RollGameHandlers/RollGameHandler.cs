@@ -1,4 +1,5 @@
-﻿using MyUpdatedBot.Services.RollGame;
+﻿using MyUpdatedBot.Core.Localization;
+using MyUpdatedBot.Services.RollGame;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -6,15 +7,17 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace MyUpdatedBot.Core.Handlers.RollGameHandlers
 {
-    internal class RollGameHandler : IMessageHandler
+    public class RollGameHandler : IMessageHandler
     {
         private readonly IRollService _rollService;
         private readonly TimeSpan _duration;
+        private readonly LocalizationUtil _loc;
 
-        public RollGameHandler(IRollService rollService, TimeSpan? duration = null) 
+        public RollGameHandler(IRollService rollService, LocalizationUtil loc, TimeSpan? duration = null)
         {
             _rollService = rollService;
-            _duration = duration ?? TimeSpan.FromMinutes(1);
+            _duration = duration ?? TimeSpan.FromSeconds(60);
+            _loc = loc;
         }
 
         public bool CanHandle(Message? message)
@@ -27,18 +30,19 @@ namespace MyUpdatedBot.Core.Handlers.RollGameHandlers
         }
         public async Task HandleAsync(ITelegramBotClient botClient, Message message, CancellationToken ct)
         {
-            var eventId = _rollService.CreateEvent(message.Chat.Id, message.From!.Id, _duration);
+            var chatId = message.Chat.Id;
+            var eventId = _rollService.CreateEvent(chatId, message.From!.Id, _duration);
 
             var kb = new InlineKeyboardMarkup(new[]
             {
-                new [] {InlineKeyboardButton.WithCallbackData("Ролл 🎲", $"roll:{eventId:N}") },
-                new [] {InlineKeyboardButton.WithCallbackData("Остановить ⛔️", $"stop:{eventId:N}") }
+                new [] {InlineKeyboardButton.WithCallbackData(await _loc.GetStringAsync(chatId, message, "RollButton"), $"roll:{eventId:N}") },
+                new [] {InlineKeyboardButton.WithCallbackData(await _loc.GetStringAsync(chatId, message, "StopButton"), $"stop:{eventId:N}") }
             });
 
-            var text = $"🎲 Розыгрыш начат! Инициатор: [{message.From.FirstName}](tg://user?id={message.From.Id})\n\n" +
-                       $"Нажмите «Ролл 🎲» чтобы бросить.\nВремя: {_duration.TotalMinutes} минуты";
+            var text = $"🎲 {await _loc.GetStringAsync(chatId, message, "StartEvent")}: [{message.From.FirstName}](tg://user?id={message.From.Id})\n\n" +
+                       $"{await _loc.GetStringAsync(chatId, message, "RollDice")} {_duration.TotalSeconds}";
 
-            var sent = await botClient.SendMessage(message.Chat.Id, text, ParseMode.Markdown, replyMarkup: kb, cancellationToken: ct);
+            var sent = await botClient.SendMessage(chatId, text, ParseMode.Markdown, replyMarkup: kb, cancellationToken: ct);
 
             // notify the messageId to service so that it can be edited
             _rollService.SetMessageId(eventId, sent.MessageId);
