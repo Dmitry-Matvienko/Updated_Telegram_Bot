@@ -280,4 +280,41 @@ Each round lasts *15* minutes</value>
     <value>minutes ago
 Selected action:</value>
   </data>
+  <data name="RollButton" xml:space="preserve">
+    <value>Roll 🎲</value>
+  </data>
+  <data name="StopButton" xml:space="preserve">
+    <value>Stop ⛔️</value>
+  </data>
+  <data name="StartEvent" xml:space="preserve">
+    <value>The contest has begun! Organizer</value>
+  </data>
+  <data name="RollDice" xml:space="preserve">
+    <value>Click “Roll 🎲” to roll the dice.
+Seconds left: </value>
+  </data>
+  <data name="GameAlreadyEnded" xml:space="preserve">
+    <value>The game is over</value>
+  </data>
+  <data name="UserThrow" xml:space="preserve">
+    <value>Your throw</value>
+  </data>
+  <data name="AlreadyRolled" xml:space="preserve">
+    <value>You've already rolled the dice</value>
+  </data>
+  <data name="EventStopped" xml:space="preserve">
+    <value>The event has been suspended</value>
+  </data>
+  <data name="NoParticipantsYet" xml:space="preserve">
+    <value>_No participants yet_</value>
+  </data>
+  <data name="WinnersEvent" xml:space="preserve">
+    <value>Winners:</value>
+  </data>
+  <data name="OtherParticipants" xml:space="preserve">
+    <value>The other participants</value>
+  </data>
+  <data name="UntilTheEnd" xml:space="preserve">
+    <value>Until the end</value>
+  </data>
 </root>

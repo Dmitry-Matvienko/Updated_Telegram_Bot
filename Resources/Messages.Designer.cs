@@ -70,6 +70,15 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на You&apos;ve already rolled the dice.
+        /// </summary>
+        internal static string AlreadyRolled {
+            get {
+                return ResourceManager.GetString("AlreadyRolled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на ⛔ Ban.
         /// </summary>
         internal static string BanButton {
@@ -287,6 +296,24 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на The event has been suspended.
+        /// </summary>
+        internal static string EventStopped {
+            get {
+                return ResourceManager.GetString("EventStopped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на The game is over.
+        /// </summary>
+        internal static string GameAlreadyEnded {
+            get {
+                return ResourceManager.GetString("GameAlreadyEnded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на ⚠️ The game is already started in this chat..
         /// </summary>
         internal static string GameAlreadyStarted {
@@ -368,6 +395,15 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на _No participants yet_.
+        /// </summary>
+        internal static string NoParticipantsYet {
+            get {
+                return ResourceManager.GetString("NoParticipantsYet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на You are not an administrator of this chat..
         /// </summary>
         internal static string NotAdmin {
@@ -413,11 +449,39 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на The other participants.
+        /// </summary>
+        internal static string OtherParticipants {
+            get {
+                return ResourceManager.GetString("OtherParticipants", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Processed by the admin.
         /// </summary>
         internal static string ProcessedByAdmin {
             get {
                 return ResourceManager.GetString("ProcessedByAdmin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Roll 🎲.
+        /// </summary>
+        internal static string RollButton {
+            get {
+                return ResourceManager.GetString("RollButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Click “Roll 🎲” to roll the dice.
+        ///Seconds left: .
+        /// </summary>
+        internal static string RollDice {
+            get {
+                return ResourceManager.GetString("RollDice", resourceCulture);
             }
         }
         
@@ -440,6 +504,15 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на The contest has begun! Organizer.
+        /// </summary>
+        internal static string StartEvent {
+            get {
+                return ResourceManager.GetString("StartEvent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Let&apos;s play “Crocodile”! Host: .
         /// </summary>
         internal static string StartTheGamePart1 {
@@ -456,6 +529,15 @@ namespace MyUpdatedBot.Resources {
         internal static string StartTheGamePart2 {
             get {
                 return ResourceManager.GetString("StartTheGamePart2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Stop ⛔️.
+        /// </summary>
+        internal static string StopButton {
+            get {
+                return ResourceManager.GetString("StopButton", resourceCulture);
             }
         }
         
@@ -483,6 +565,15 @@ namespace MyUpdatedBot.Resources {
         internal static string UnknownCommand {
             get {
                 return ResourceManager.GetString("UnknownCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Until the end.
+        /// </summary>
+        internal static string UntilTheEnd {
+            get {
+                return ResourceManager.GetString("UntilTheEnd", resourceCulture);
             }
         }
         
@@ -523,12 +614,30 @@ namespace MyUpdatedBot.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Your throw.
+        /// </summary>
+        internal static string UserThrow {
+            get {
+                return ResourceManager.GetString("UserThrow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Hello! Thanks for adding me.
         ///Please select a language for this chat.
         /// </summary>
         internal static string Welcome_Title {
             get {
                 return ResourceManager.GetString("Welcome_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Winners:.
+        /// </summary>
+        internal static string WinnersEvent {
+            get {
+                return ResourceManager.GetString("WinnersEvent", resourceCulture);
             }
         }
         

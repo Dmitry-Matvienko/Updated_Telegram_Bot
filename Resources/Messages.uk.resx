@@ -280,4 +280,41 @@
     <value>хвилин тому
 Вибрана дія:</value>
   </data>
+  <data name="RollButton" xml:space="preserve">
+    <value>Ролл 🎲</value>
+  </data>
+  <data name="StopButton" xml:space="preserve">
+    <value>Зупинити ⛔️</value>
+  </data>
+  <data name="StartEvent" xml:space="preserve">
+    <value>Розіграш розпочато! Ініціатор</value>
+  </data>
+  <data name="RollDice" xml:space="preserve">
+    <value>Натисніть «Ролл 🎲», щоб кинути.
+Секунд залишилось: </value>
+  </data>
+  <data name="GameAlreadyEnded" xml:space="preserve">
+    <value>Гру вже закінчено</value>
+  </data>
+  <data name="UserThrow" xml:space="preserve">
+    <value>Твій кидок</value>
+  </data>
+  <data name="AlreadyRolled" xml:space="preserve">
+    <value>Ти вже кидав</value>
+  </data>
+  <data name="EventStopped" xml:space="preserve">
+    <value>Розіграш зупинено</value>
+  </data>
+  <data name="NoParticipantsYet" xml:space="preserve">
+    <value>_Поки що немає учасників_</value>
+  </data>
+  <data name="WinnersEvent" xml:space="preserve">
+    <value>Переможці:</value>
+  </data>
+  <data name="OtherParticipants" xml:space="preserve">
+    <value>Інші учасники</value>
+  </data>
+  <data name="UntilTheEnd" xml:space="preserve">
+    <value>До кінця</value>
+  </data>
 </root>

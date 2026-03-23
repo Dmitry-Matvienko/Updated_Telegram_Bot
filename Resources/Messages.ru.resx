@@ -280,4 +280,41 @@
     <value>минут назад
 Выбранное действие:</value>
   </data>
+  <data name="RollButton" xml:space="preserve">
+    <value>Ролл 🎲</value>
+  </data>
+  <data name="StopButton" xml:space="preserve">
+    <value>Остановить ⛔️</value>
+  </data>
+  <data name="StartEvent" xml:space="preserve">
+    <value>Розыгрыш начат! Инициатор</value>
+  </data>
+  <data name="RollDice" xml:space="preserve">
+    <value>Нажмите «Ролл 🎲» чтобы бросить.
+Секунд осталось: </value>
+  </data>
+  <data name="GameAlreadyEnded" xml:space="preserve">
+    <value>Игра уже закончена</value>
+  </data>
+  <data name="UserThrow" xml:space="preserve">
+    <value>Твой бросок</value>
+  </data>
+  <data name="AlreadyRolled" xml:space="preserve">
+    <value>Ты уже бросал</value>
+  </data>
+  <data name="EventStopped" xml:space="preserve">
+    <value>Розыгрыш остановлен</value>
+  </data>
+  <data name="NoParticipantsYet" xml:space="preserve">
+    <value>_Пока нет участников_</value>
+  </data>
+  <data name="WinnersEvent" xml:space="preserve">
+    <value>Победители:</value>
+  </data>
+  <data name="OtherParticipants" xml:space="preserve">
+    <value>Остальные участники</value>
+  </data>
+  <data name="UntilTheEnd" xml:space="preserve">
+    <value>До конца</value>
+  </data>
 </root>
